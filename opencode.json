@@ -1,24 +1,30 @@
 {
-  "mcpServers": {
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
     "sequential-thinking": {
+      "type": "local",
       "command": "cmd",
       "args": [
         "/c",
         "npx",
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
-      ]
+      ],
+      "enabled": true
     },
     "memory": {
+      "type": "local",
       "command": "cmd",
       "args": [
         "/c",
         "npx",
         "-y",
         "@modelcontextprotocol/server-memory"
-      ]
+      ],
+      "enabled": true
     },
     "filesystem": {
+      "type": "local",
       "command": "cmd",
       "args": [
         "/c",
@@ -26,23 +32,8 @@
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "C:\\Users\\GoldRush\\Documents\\MyProject\\AINovel"
-      ]
+      ],
+      "enabled": true
     }
-  },
-  "agent": {
-    "skills": [
-      "story",
-      "story-setup",
-      "story-long-write",
-      "story-short-write",
-      "story-deslop",
-      "story-review",
-      "story-cover",
-      "story-import",
-      "story-long-analyze",
-      "story-short-analyze",
-      "story-long-scan",
-      "story-short-scan"
-    ]
   }
 }
