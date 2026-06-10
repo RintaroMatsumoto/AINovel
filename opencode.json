@@ -1,0 +1,48 @@
+{
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "memory": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "filesystem": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\GoldRush\\Documents\\MyProject\\AINovel"
+      ]
+    }
+  },
+  "agent": {
+    "skills": [
+      "story",
+      "story-setup",
+      "story-long-write",
+      "story-short-write",
+      "story-deslop",
+      "story-review",
+      "story-cover",
+      "story-import",
+      "story-long-analyze",
+      "story-short-analyze",
+      "story-long-scan",
+      "story-short-scan"
+    ]
+  }
+}
