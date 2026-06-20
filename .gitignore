@@ -13,3 +13,6 @@ Thumbs.db
 
 # Skills
 .skills/
+
+# Memory (knowledge graph)
+.memory/
