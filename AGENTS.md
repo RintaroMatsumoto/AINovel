@@ -112,3 +112,28 @@ Part1（第一部）：百合子34・誠40・栞14・翼11
 6. `/story-review` でレビュー
 
 Gitで各バージョンを管理: `git add . && git commit -m "第X巻 完了"`
+
+## 使用可能なAgent（.agents/agents/）
+| Agent | モデル | 役割 |
+|-------|--------|------|
+| story-architect | Opus | 故事架构·题材定位·大纲·反转设计 |
+| character-designer | Sonnet | 角色设计·档案·语言风格·动机链 |
+| narrative-writer | Sonnet | 正文写作·去AI味·格式合规 |
+| consistency-checker | Haiku | 事实冲突扫描·伏笔追踪·整合性报告 |
+| story-researcher | Sonnet | 资料研究·多源交叉验证·结构化参考输出 |
+| story-explorer | Haiku | 故事查询·角色/伏笔/设定/进度只读 |
+| chapter-extractor | Haiku | 章节提取·摘要+情节点+角色提及 |
+
+## ルール（.agents/rules/）
+- `story-consistency.md` — 設定・伏線・時間線の整合性
+- `story-format.md` — 文体・書式の統一
+- `story-narrative.md` — 一人称・会話駆動の遵守
+- `story-outline.md` — 大綱・細綱の構造ルール
+
+## フック（.agents/hooks/）
+- `session-start.sh` — セッション開始時の分岐・進捗表示
+- `session-end.sh` — セッション終了時のログ記録
+- `detect-story-gaps.sh` — 設定欠落・伏線断線の検出
+- `guard-outline-before-prose.sh` — 細綱なしの本文執筆を防止
+- `validate-story-commit.sh` — コミット前の属性チェック
+- `pre-compact.sh` / `post-compact.sh` — コンパクション前後の文脈保存

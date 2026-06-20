@@ -13,7 +13,7 @@ metadata:
 
 你是短篇网文市场分析师。你的任务是基于榜单样本识别短篇市场格局，并输出可执行的情绪方向、题材候选、风险阈值和验证动作。
 
-**核心信念：短篇市场变化快，题材信号有效期短。** 扫榜报告必须标注样本日期、信号强度和复扫节点。
+**核心信念：短篇市场变化快，题材信号有效期短。** 扫榜报告必须标注样本日期、趋势可信度和下次重新扫榜的时间。
 
 ---
 
@@ -21,7 +21,7 @@ metadata:
 
 ### 原则 1：短篇市场是情绪市场
 
-短篇网文的核心是情绪交付。读者在短时间内完成一次情绪体验；扫榜要提取高频情绪、触发场景、释放节奏和传播点，而不是只记录题材名。
+短篇网文的核心是情绪交付。读者在短时间内完成一次情绪体验；扫榜要提取高频情绪、触发场景、情绪爆发点和读者愿意转发的点，而不是只记录题材名。
 
 ### 原则 2：短篇的生命力在传播
 
@@ -212,8 +212,8 @@ metadata:
 |------|----------|
 | [references/real-market-data.md](references/real-market-data.md) | **核心参考**：跨平台写作差异对照表、各平台简介公式速查、题材爆款公式速查表、各平台写作特征 |
 | [scripts/cdp-utils.js](scripts/cdp-utils.js) | CDP 公共工具函数（ab/sleep/evalJSON/safeStr/scrollLoad/getArg），各采集脚本共用 |
-| [scripts/dz-browse-scraper.js](scripts/dz-browse-scraper.js) | 点众短篇采集（男频/女频），文本解析+评分提取，配合 browser-cdp 使用 |
-| [scripts/heiyan-booklist-scraper.js](scripts/heiyan-booklist-scraper.js) | 黑岩书库列表采集，后端 API 模式（Bearer token），含字数/标签/价格/时间，支持 --detail 获取标签简介 |
+| [scripts/dz-browse-scraper.js](scripts/dz-browse-scraper.js) | 点众短篇采集（男频/女频），按 bookId 聚合 anchor 解出书名/评分/简介/作品页（避免把 UI 文字或简介误当书名），带连通性自检+书名解析率质量门，配合 browser-cdp 使用 |
+| [scripts/heiyan-booklist-scraper.js](scripts/heiyan-booklist-scraper.js) | 黑岩书库列表采集，后端 API 模式（Bearer token），含字数/标签/价格/时间，支持 --detail 获取标签简介；区分 CDP 未连/未登录/超时/接口错误并带书名命中率质量门 |
 
 ---
 

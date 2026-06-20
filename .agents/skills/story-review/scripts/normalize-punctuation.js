@@ -7,7 +7,7 @@ const path = require('path');
 const USAGE = `Usage: node normalize-punctuation.js [--check] [--quote-mode keep|ascii|yan] <file...>
 
 Normalize正文 punctuation deterministically:
-  - replace em dashes / double hyphens with Chinese punctuation
+  - replace ellipses, em dashes, and double hyphens with Chinese punctuation
   - remove markdown divider lines (---) from正文
   - keep quote style by default; convert quotes only when explicitly requested
 `;
@@ -138,9 +138,9 @@ function normalizeDocument(input, quoteMode) {
       continue;
     }
 
-    const dashResult = normalizeDashes(line, lineNo);
-    findings.push(...dashResult.findings);
-    line = dashResult.line;
+    const punctuationResult = normalizePausePunctuation(line, lineNo);
+    findings.push(...punctuationResult.findings);
+    line = punctuationResult.line;
 
     const quoteResult = normalizeQuotes(line, quoteMode, quoteOpen, lineNo);
     findings.push(...quoteResult.findings);
@@ -156,25 +156,26 @@ function normalizeDocument(input, quoteMode) {
   };
 }
 
-function normalizeDashes(line, lineNo) {
+function normalizePausePunctuation(line, lineNo) {
   const findings = [];
   const original = line;
-  const pattern = /——|—|--+/g;
+  const pattern = /…+|\.{3,}|——|—|--+/g;
   let output = '';
   let lastIndex = 0;
   let match;
 
   while ((match = pattern.exec(original)) !== null) {
     output += original.slice(lastIndex, match.index);
-    const replacement = chooseDashReplacement(original, match.index, match[0].length);
+    const token = match[0];
+    const replacement = choosePauseReplacement(original, match.index, token.length);
     output += replacement;
     findings.push({
       line: lineNo,
       column: match.index + 1,
-      type: match[0].startsWith('-') ? 'double-hyphen' : 'em-dash',
+      type: getPauseType(token),
       message: replacement ? `替换为「${replacement}」。` : '移除重复标点。',
     });
-    lastIndex = match.index + match[0].length;
+    lastIndex = match.index + token.length;
   }
 
   output += original.slice(lastIndex);
@@ -192,13 +193,25 @@ function hasYamlFrontMatter(lines) {
   return false;
 }
 
-function chooseDashReplacement(text, start, length) {
+function getPauseType(token) {
+  if (token.startsWith('-')) return 'double-hyphen';
+  if (token.includes('—')) return 'em-dash';
+  return 'ellipsis';
+}
+
+function choosePauseReplacement(text, start, length) {
   const before = previousNonSpace(text, start - 1);
   const after = nextNonSpace(text, start + length);
   const rest = text.slice(start + length).trimStart();
 
-  if (!after) return isSentencePunctuation(before) ? '' : '。';
+  // 正文产物不保留 `……`、`——`、`—` 或 `--`；对话打断和数字区间不设例外。
+  if (before === '') return '';
+  // 紧跟开引号/开括号的停顿符号属于句首边界，删空即可，避免产出 `「，…」` 或 `「。」`。
+  if (isOpeningDelimiter(before)) return '';
+  if (/\d/.test(before) && /\d/.test(after)) return '到';
   if (isClosingQuote(after)) return isSentencePunctuation(before) ? '' : '。';
+
+  if (!after) return isSentencePunctuation(before) ? '' : '。';
   if (isSentencePunctuation(before) || isPunctuation(after)) return '';
   if (/^(因为|原来|这是|那是|也就是|换句话|说白了|所谓|答案|原因|结果|真相|问题在于)/.test(rest)) return '：';
   if (/(原因|答案|真相|结果|结论|问题|选择|意思)$/.test(text.slice(0, start).trim())) return '：';
@@ -229,6 +242,10 @@ function isPunctuation(ch) {
 
 function isClosingQuote(ch) {
   return /["”」』]/.test(ch || '');
+}
+
+function isOpeningDelimiter(ch) {
+  return /[「『（(“‘]/.test(ch || '');
 }
 
 function normalizeQuotes(line, quoteMode, quoteOpen, lineNo) {
