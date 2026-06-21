@@ -41,6 +41,7 @@ AIと協力して小説を書くための統合パイプライン。
    - 市場調査・企画段階 → `story-long-scan`
    - 参考作品分析中 → `story-long-analyze`
    - プロット・設定構築中 → `story-long-write`（Phase 1-3）
+   - **全編スキル再構築（Phase 2 核心設定から開始）** → `story-long-write`
    - 本文執筆中 → `story-long-write`（Phase 4）
    - 品質確認・レビュー → `story-review`
    - AI臭除去 → `story-deslop`
@@ -48,6 +49,31 @@ AIと協力して小説を書くための統合パイプライン。
    - ルーター起動のみ（まだ決まってない） → `story`
 4. ロードしたスキルのワークフローに沿ってタスクを進める。スキルが定義する各Phaseの手順を優先する
 5. `参考/` 配下の調査ファイルが存在する場合、執筆前に内容を参照する
+
+## 全編スキル再構築 実行計画
+前セッションの診断により、プロット・構成・本文がスキル未使用で作成され「設計図なしの状態」と判明。
+設定（あんた監修）は流用し、それ以外は `/story-long-write` ワークフローに従い再構築する。
+
+### Phase 2：核心設定の再構成（次回開始地点）
+- 既存の `設定/` ファイルをスキルテンプレートに変換
+- story-architect を spawn して題材定位・核心梗を確認
+- 追加: 設定/関係.md、設定/題材定位.md（主对标書フィールド含む）
+- 設定はあんた監修のため再定義不要。フォーマット変換のみ。
+
+### Phase 3：大綱構築
+- 各巻の巻構成（爽点リズム・感情弧・人物弧・キー反転・伏線配置）
+- 全51章の細綱（新版章設計図）を story-architect と協力して生成
+- 3章ごとに5章を先行生成するローリング方式
+
+### Phase 4：本文執筆（narrative-writer）
+- 各章は細綱→写前準備→narrative-writer spawn の順で執筆
+- 書いた後: 字数検証→メタ情報スキャン→禁用語→標点正規化→追跡更新
+- 3章ごとに中間スナップショット
+
+### Phase 5：品質チェック
+- 禁用語スキャン（banned-words.md）
+- 標点正規化（normalize-punctuation.js）
+- story-review full で最終レビュー
 
 ## スキル使用ルール
 - **セッション開始時**: 必ず上記Protocolに従いスキルをロードする
@@ -157,16 +183,49 @@ Part1（第一部）：百合子34・誠40・栞14・翼11
 
 Gitで各バージョンを管理: `git add . && git commit -m "第X巻 完了"`
 
+## 再起動後チェックリスト
+
+### Step 0：再起動確認
+- プロンプトが通常通り表示されること
+- YAML パースエラーが発生しないこと
+- Available agents: 一覧にカスタム agent が表示されること
+
+### Step 1：Agent一覧確認
+ls .opencode/agents/
+→ 7ファイル全て存在することを確認
+
+### Step 2：Spawnテスト
+/story-review を実行
+→ full モード: 4人のreviewer agent spawn → ✅
+→ solo モード: agent登録問題のフォールバック → ⚠️
+
+### Step 3：全文脈読み込みテスト
+/story-long-write を実行
+→ Phase 1〜4 の指示が表示され、Phase 4 で narrative-writer への言及があること
+
+### Step 4：(任意) narrative-writer 直接spawnテスト
+以下をプロンプトに貼り付け：
+「Agent(subagent_type: "narrative-writer")で自分自身をspawnして、task toolが使えるか確認。実際の執筆は不要。」
+→ エラーなく応答すればOK。
+
+### Step 5：不具合時の切り分け
+| 症状 | 原因 | 対処 |
+|---|---|---|
+| opencodeが起動しない | YAMLパースエラー | `.opencode/agents/*.md` の frontmatter を確認 |
+| @候補にagentが出ない | 登録失敗 | ファイル名 + mode: subagent を確認 |
+| story-review が solo にフォールバック | agent非登録 または #26700 bug | opencode --version 確認 |
+| spawn時に権限エラー | permission継承問題 | #27654未リリース。opencode最新版にupdate |
+
 ## 使用可能なAgent（.opencode/agents/）
-| Agent | モデル | 役割 |
-|-------|--------|------|
-| story-architect | Opus | 物語設計・題材定位・構成・反転設計 |
-| character-designer | Sonnet | キャラ設計・プロファイル・言語スタイル・動機連鎖 |
-| narrative-writer | Sonnet | 本文執筆・AI臭除去・書式チェック |
-| consistency-checker | Haiku | 事実矛盾スキャン・伏線追跡・整合性レポート |
-| story-researcher | Sonnet | 資料調査・多源クロス検証・構造化参考出力 |
-| story-explorer | Haiku | 物語照会・キャラ/伏線/設定/進捗 読み取り専用 |
-| chapter-extractor | Haiku | 章抽出・要約＋情節点＋キャラ言及 |
+| Agent | 役割 | 権限 |
+|-------|------|------|
+| story-architect | 物語設計・世界観構築・大綱配置・フック/サスペンス/反転設計 | read:allow edit:allow bash:ask |
+| character-designer | キャラ設計・言語スタイル・動機連鎖・人物弧線・会話創作 | read:allow edit:allow bash:ask |
+| narrative-writer | 本文執筆・AI臭除去・三層織り込み・禁用語置換 | read:allow edit:allow bash:ask |
+| consistency-checker | 事実矛盾スキャン・伏線追跡・S1-S4整合性レポート | read:allow edit:deny bash:deny |
+| story-researcher | 外部資料調査・CDP/WebSearch・構造化参考出力 | read:allow edit:deny bash:ask webfetch:allow websearch:allow |
+| story-explorer | プロジェクト構造化クエリ・キャラ/伏線/設定/進捗 | read:allow edit:deny bash:deny |
+| chapter-extractor | 章抽出・要約＋情節点＋キャラ言及 | read:allow edit:deny bash:deny |
 
 ## ルール（.agents/rules/）
 - `story-consistency.md` — 設定・伏線・時間線の整合性
