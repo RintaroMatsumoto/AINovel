@@ -1,5 +1,5 @@
 #!/bin/bash
-# validate-story-commit.sh — 在 git commit 时检查格式问题（WARNING only, no BLOCKING）
+# validate-story-commit.sh — git commit 時にフォーマット問題をチェック（WARNINGのみ、BLOCKINGなし）
 set -euo pipefail
 
 source "$(dirname "$0")/lib/common.sh"
@@ -11,8 +11,8 @@ fi
 export HOOK_INPUT
 
 is_git_commit_command() {
-  # 探测真正可用的解释器：Windows 上 `command -v python3` 会命中 Microsoft Store
-  # 占位程序（exit 49），所以必须实跑一次 -c "" 而非只查 PATH。
+  # 実際に使用可能なインタプリタを検出：Windows上で `command -v python3` はMicrosoft Store
+  # スタブ（exit 49）にヒットするため、PATHを確認するだけでなく実際に -c "" を実行する必要がある。
   local PYBIN=""
   for c in python3 python py; do
     if "$c" -c "" >/dev/null 2>&1; then PYBIN="$c"; break; fi
@@ -154,24 +154,25 @@ sys.exit(1)
 PY
 }
 
-# PreToolUse matcher 可能过宽或目标 CLI 不支持 if 字段；脚本必须内部自检。
-# 没有明确 git commit 命令时完全静默退出，避免 echo/grep 等命令误触发。
+# PreToolUse matcher が広すぎるか、ターゲットCLIが if フィールドをサポートしていない可能性がある。スクリプトは内部で自己チェックする必要がある。
+# 明確な git commit コマンドがない場合は完全に静かに終了。echo/grep などのコマンドの誤トリガーを避ける。
 if ! is_git_commit_command; then
   exit 0
 fi
 
-# 后续 case + grep 在中文路径/正文内容上做匹配。Windows 中文系统若导出 GBK 区域设置，
-# grep 按 GBK 多字节解码 UTF-8 内容会乱。强制 C 区域走字节匹配才稳定（issue #164 同类）。
-# 放在 is_git_commit_command（内嵌 python）之后，避免影响其输入解码。
+# 後続の case + grep で中国語パス/本文内容をマッチング。Windows中国語システムでGBKロケールが
+# エクスポートされている場合、grepはUTF-8コンテンツをGBKマルチバイトとしてデコードし文字化けする。
+# 強制Cロケールでバイト一致すれば安定（issue #164 同類）。
+# is_git_commit_command（内蔵python）の後に配置し、その入力デコードに影響しないようにする。
 export LC_ALL=C
 
 ROOT=$(project_root)
 GIT_ROOT=$(git -C "$ROOT" rev-parse --show-toplevel 2>/dev/null || printf '%s\n' "$ROOT")
 WARNINGS=""
 
-# 获取即将 commit 的文件列表（使用 -z null 分隔避免空格路径问题）
+# コミット予定のファイルリストを取得（-z null区切りでスペースパス問題を回避）
 while IFS= read -r -d '' file; do
-  # 跳过非 md 文件
+  # md ファイル以外はスキップ
   case "$file" in
     *.md) ;;
     *) continue ;;
@@ -182,10 +183,10 @@ while IFS= read -r -d '' file; do
     FULL_PATH="$GIT_ROOT/$file"
   fi
 
-  # 检查正文文件是否包含硬编码的情节值
-  # 冒号/空白都用交替而不是把全角字符塞进方括号字符组：含全角字符的字符组在 C 区域会被
-  # 拆成单字节、漏匹配；(：|:) 同时命中全角「：」和半角「:」，([[:space:]]|　) 在 LC_ALL=C 下
-  # 也认全角空格 U+3000（否则全角空格分隔的写法会漏检/误判）。
+  # 本文ファイルにハードコードされたプロット値が含まれていないかチェック
+  # コロン/空白は全角文字を角括弧文字グループに入れるのではなく、代替を使用。全角文字を含む文字グループはCロケールで
+  # シングルバイトに分解され、マッチ漏れする。(：|:) は全角「：」と半角「:」の両方にヒット、([[:space:]]|　) は LC_ALL=C 下で
+  # 全角スペース U+3000 も認識する（そうしないと全角スペース区切りの記述が漏検出/誤判定される）。
   case "$file" in
     正文.md|*/正文.md|正文/*|*/正文/*)
       HARDCODED=$(grep -nE "(身高|体重|年龄)([[:space:]]|　)*(：|:)([[:space:]]|　)*[0-9]+" "$FULL_PATH" 2>/dev/null || true)
@@ -195,7 +196,7 @@ while IFS= read -r -d '' file; do
       ;;
   esac
 
-  # 检查设定文件的必填字段（结构化匹配：key:value 格式）
+  # 設定ファイルの必須フィールドをチェック（構造化マッチング：key:value 形式）
   case "$file" in
     设定/*|*/设定/*)
       if ! grep -qE "^([[:space:]]|　)*(名字|姓名|名称|name|Name)([[:space:]]|　)*(：|:)" "$FULL_PATH" 2>/dev/null; then
@@ -211,5 +212,5 @@ if [ -n "$WARNINGS" ]; then
   echo "=== End Warnings ==="
 fi
 
-# Always exit 0 — 写作流程不能被 hook 卡住
+# 常に exit 0 — 執筆フローが hook で止められてはいけない
 exit 0

@@ -2,40 +2,40 @@
 name: story-setup
 version: 1.2.2
 description: |
-  网文写作工具集基础设施部署。将 hooks/rules/agents/CLAUDE.md 等基础设施部署到用户项目目录。
-  触发方式：/story-setup、「准备写书」「帮我搭一下环境」「配置写作项目」
+  網文ライティングツールセットのインフラストラクチャデプロイ。hooks/rules/agents/CLAUDE.md などのインフラをユーザープロジェクトにデプロイする。
+  トリガー方法：/story-setup、「本を書く準備」「環境を整えて」「ライティングプロジェクトを設定」
 metadata:
   openclaw:
     source: https://github.com/worldwonderer/oh-story-claudecode
 ---
 
-# story-setup：网文写作工具集基础设施部署
+# story-setup：網文ライティングツールセット インフラストラクチャデプロイ
 
-你是写作基础设施部署器。将网文写作工具集的全套基础设施（hooks、rules、agents、CLAUDE.md）部署到用户项目目录。
+あなたはライティングインフラストラクチャデプロイヤーです。網文ライティングツールセットの全インフラ（hooks、rules、agents、CLAUDE.md）をユーザープロジェクトにデプロイします。
 
-**执行铁律：不覆盖用户已有配置，合并而非替换。**
+**絶対ルール：ユーザーの既存設定を上書きせず、マージして置き換える。**
 
 ---
 
-## Phase 1：检测项目状态
+## Phase 1：プロジェクト状態の検出
 
-1. 检查当前目录是否已部署过（存在 `.story-deployed`）
-   - 如果已存在 → 使用 AskUserQuestion 确认是否重新部署
-2. 检查是否有书名目录（包含 `追踪/` 子目录的目录，或用户自定义结构）
-   - 有 → 识别为长篇项目，显示当前项目信息
-   - 无 → 识别为新项目或短篇项目
-3. 检查 `.claude/settings.local.json` 是否存在
-   - 存在 → 读取现有配置，后续合并
-   - 不存在 → 后续创建新文件
-4. 检查 `.active-book` 文件是否存在
-   - 存在 → 显示当前活跃书目
-   - 不存在 → 跳过
+1. 現在のディレクトリが既にデプロイ済みか確認（`.story-deployed` の存在）
+   - 既にある場合 → AskUserQuestion で再デプロイするか確認
+2. 書名ディレクトリ（`追踪/` サブディレクトリを含むディレクトリ、またはユーザー定義構造）があるか確認
+   - あり → 長編プロジェクトとして認識、現在のプロジェクト情報を表示
+   - なし → 新規プロジェクトまたは短編プロジェクトとして認識
+3. `.claude/settings.local.json` の存在確認
+   - あり → 既存設定を読み込み、後でマージ
+   - なし → 後で新規ファイルを作成
+4. `.active-book` ファイルの存在確認
+   - あり → 現在のアクティブ書名を表示
+   - なし → スキップ
 
-## Phase 2：部署基础设施
+## Phase 2：インフラストラクチャデプロイ
 
-使用 AskUserQuestion 确认部署位置后，依次执行。
+AskUserQuestion でデプロイ位置を確認後、順次実行。
 
-### 2.0 部署清单（机械可检查）
+### 2.0 デプロイリスト（機械的にチェック可能）
 
 | Source path | Target path | Owner class | Merge mode | Validation check |
 |-------------|-------------|-------------|------------|------------------|
@@ -45,65 +45,65 @@ metadata:
 | `skills/story-setup/references/templates/agents/*.md` | `.opencode/agents/*.md` | story-setup managed | replace | 7 agent files exist |
 | `skills/story-setup/references/agent-references/*.md` | `.claude/skills/story-setup/references/agent-references/*.md` | story-setup managed | replace | every `story-setup/references/agent-references/*.md` reference resolves |
 | `skills/story-setup/references/templates/settings-hooks.json` | `.claude/settings.local.json` | user+managed | merge by hook command | hook JSON valid and registered commands deduped |
-| `skills/story-setup/references/templates/上下文.md.tmpl` | `{书名}/追踪/上下文.md` | user state | create only if absent | never overwrite existing writing context |
+| `skills/story-setup/references/templates/上下文.md.tmpl` | `{書名}/追踪/上下文.md` | user state | create only if absent | never overwrite existing writing context |
 | generated sentinel | `.story-deployed` | story-setup managed | replace | contains `agents_version`, `setup_skill_version`, `target_cli`, `resolver_strategy`, `references_dir` |
 
-### 2.1 部署 CLAUDE.md
+### 2.1 CLAUDE.md のデプロイ
 
-- 读取 `skills/story-setup/references/templates/CLAUDE.md.tmpl`
-- 替换占位符（见下方「模板占位符」段）
-- 写入项目根目录 `CLAUDE.md`（如已存在，按「CLAUDE.md 合并策略」处理）
+- `skills/story-setup/references/templates/CLAUDE.md.tmpl` を読み込み
+- プレースホルダーを置換（下記「テンプレートプレースホルダー」参照）
+- プロジェクトルート `CLAUDE.md` に書き込み（既存の場合は「CLAUDE.md マージ戦略」に従って処理）
 
-### 2.2 部署 Hooks
+### 2.2 Hooks のデプロイ
 
-- **递归复制完整目录树**：将 `skills/story-setup/references/templates/hooks/` 复制到用户项目 `.claude/hooks/`
-- 必须保留子目录 `lib/`，其中：
-  - `lib/common.sh` 提供 `project_root`、`discover_active_book`、`discover_all_books`
-  - `lib/sentinel.sh` 提供 `.story-deployed` 字段读取
-- 只需对 `.claude/hooks/*.sh` 设置执行权限（`chmod +x`）；`lib/*.sh` 由 hook `source`，不要求可执行位
+- **ディレクトリツリーを再帰的にコピー**：`skills/story-setup/references/templates/hooks/` をユーザープロジェクトの `.claude/hooks/` にコピー
+- サブディレクトリ `lib/` を保持する必要あり：
+  - `lib/common.sh` は `project_root`、`discover_active_book`、`discover_all_books` を提供
+  - `lib/sentinel.sh` は `.story-deployed` フィールドの読み取りを提供
+- `.claude/hooks/*.sh` にのみ実行権限を設定（`chmod +x`）；`lib/*.sh` は hook が `source` するため、実行ビットは不要
 
-### 2.3 部署 Rules
+### 2.3 Rules のデプロイ
 
-- 读取 `skills/story-setup/references/templates/rules/` 下所有 `.md` 文件
-- 复制到用户项目的 `.claude/rules/` 目录
+- `skills/story-setup/references/templates/rules/` 下の全 `.md` ファイルを読み込み
+- ユーザープロジェクトの `.claude/rules/` ディレクトリにコピー
 
-### 2.4 部署 Agents
+### 2.4 Agents のデプロイ
 
-- 读取 `skills/story-setup/references/templates/agents/` 下所有 `.md` 文件
-- 复制到用户项目的 `.opencode/agents/` 目录
-- Agent 文件属于 story-setup 管理文件，可安全覆盖；版本升级时按 `UPGRADING.md` 的版本检测结果重新部署
-- **部署后必须新开会话**：Claude Code 只在会话启动时扫描 `.opencode/agents/` 注册 subagent。当前会话内新部署的 agent 不会立即可用——必须让用户新开一个 Claude Code 会话，`story-architect`/`narrative-writer` 等 custom agent 才会注册成 `subagent_type`；否则 story-review、story-long-write 等想 spawn 时会拿到「subagent_type 不可用」并降级 solo（单视角）。这一步必须在安装报告里明确告知用户（见 Phase 3 第 6 步）。
+- `skills/story-setup/references/templates/agents/` 下の全 `.md` ファイルを読み込み
+- ユーザープロジェクトの `.opencode/agents/` ディレクトリにコピー
+- Agent ファイルは story-setup 管理ファイルのため、安全に上書き可能；バージョンアップ時は `UPGRADING.md` のバージョン検出結果に従って再デプロイ
+- **デプロイ後は必ず新しいセッションを開くこと**：Claude Code はセッション起動時に `.opencode/agents/` をスキャンして subagent を登録する。現在のセッション内で新しくデプロイされた agent はすぐには利用不可——ユーザーは新しい Claude Code セッションを開く必要があり、そうして初めて `story-architect`/`narrative-writer` などのカスタム agent が `subagent_type` として登録される；そうしないと、story-review、story-long-write などが spawn しようとしたときに「subagent_type が利用不可」となり solo（単一視点）にフォールバックする。この手順はインストールレポートで必ず明示的にユーザーに伝えること（Phase 3 第 6 ステップ参照）。
 
-### 2.4.1 Agent 兼容性处理
+### 2.4.1 Agent 互換性処理
 
-- Agent frontmatter 以 Claude Code 为主；OpenClaw/qclaw 等只要支持 AgentSkills，未知字段（如 `memory`、`skills`、`disallowedTools`）应被忽略。若目标工具报 frontmatter 错误，保留 `name`、`description`、`tools` 三项，删除不支持字段后再部署。
-- 部署到项目后，agent 内引用的参考资料必须走 `story-setup/references/agent-references/*.md` 这一本 skill 内复制路径；不要跨 skill 引用其他 skill 的 references。若全局安装路径不同，优先用项目内 `.claude/skills/` 或 `skills/` 作为规范路径前缀，其次用工具的 skill 搜索能力，不要假定固定绝对路径。
+- Agent frontmatter は Claude Code を基準とする；OpenClaw/qclaw などは AgentSkills をサポートしていれば、未知のフィールド（`memory`、`skills`、`disallowedTools` など）は無視される。ターゲットツールが frontmatter エラーを報告した場合は、`name`、`description`、`tools` の 3 項目を保持し、サポート外のフィールドを削除してからデプロイする。
+- プロジェクトにデプロイ後、agent 内で参照する資料は `story-setup/references/agent-references/*.md` という本 skill 内のコピーパスを経由すること；他の skill の references を横断参照しない。グローバルインストールパスが異なる場合は、プロジェクト内の `.claude/skills/` または `skills/` を優先的なパスプレフィックスとし、次にツールの skill 検索能力を使用し、固定の絶対パスを仮定しない。
 
-### 2.4.2 部署 Agent References
+### 2.4.2 Agent References のデプロイ
 
-- 将 `skills/story-setup/references/agent-references/` 下所有 `.md` 复制到项目内 `.claude/skills/story-setup/references/agent-references/`
-- 如目标项目已经使用项目本地 `skills/` 目录，也可以同步复制到 `skills/story-setup/references/agent-references/` 作为 fallback，但不得只复制 fallback 而遗漏 `.claude/skills/` 主路径
-- 校验：凡 agent 或 reference 中出现 `story-setup/references/agent-references/<file>.md`，源包与目标包都必须存在 `<file>.md`
+- `skills/story-setup/references/agent-references/` 下の全 `.md` をプロジェクト内 `.claude/skills/story-setup/references/agent-references/` にコピー
+- ターゲットプロジェクトが既にプロジェクトローカルの `skills/` ディレクトリを使用している場合、`skills/story-setup/references/agent-references/` にもフォールバックとして同期コピーできるが、フォールバックのみにコピーして `.claude/skills/` のメインパスを欠落させてはならない
+- 検証：agent または reference 内に `story-setup/references/agent-references/<file>.md` が出現した場合、ソースパッケージとターゲットパッケージの両方に `<file>.md` が存在しなければならない
 
-### 2.5 部署 Session State 模板
+### 2.5 Session State テンプレートのデプロイ
 
-- 读取 `skills/story-setup/references/templates/上下文.md.tmpl`
-- 仅当已识别为长篇书目且 `{书名}/追踪/` 已存在时，创建缺失的 `{书名}/追踪/上下文.md`
-- 如果目标文件已存在，不覆盖；短篇项目不得因此创建 `追踪/` 目录
+- `skills/story-setup/references/templates/上下文.md.tmpl` を読み込み
+- 長編書目として認識され、かつ `{書名}/追踪/` が既に存在する場合のみ、不足している `{書名}/追踪/上下文.md` を作成
+- ターゲットファイルが既に存在する場合は上書きしない；短編プロジェクトではこれにより `追踪/` ディレクトリを作成してはならない
 
-### 2.6 合并 Hooks 注册到 settings.local.json
+### 2.6 Hooks 登録を settings.local.json にマージ
 
-> 兼容性说明：`settings-hooks.json` 中 PreToolUse 的 `if` 字段使用 Claude Code hook 条件语法，需要运行环境支持 hook-level if。若目标工具不支持该字段，hook 脚本本身仍会自检并 advisory-only 退出；部署时可删除该 `if` 字段并保留 matcher + command。
+> 互換性注意：`settings-hooks.json` 内の PreToolUse の `if` フィールドは Claude Code hook 条件構文を使用しており、hook-level if をサポートする実行環境が必要です。ターゲットツールがこのフィールドをサポートしない場合、hook スクリプト自体がセルフチェックを行い advisory-only で終了します；デプロイ時にこの `if` フィールドを削除し、matcher + command を保持しても構いません。
 
-- 读取 `skills/story-setup/references/templates/settings-hooks.json`
-- 读取用户项目的 `.claude/settings.local.json`（如存在）
-- 合并 hooks 配置（按「settings-hooks.json 合并算法」处理）
-- 写入 `.claude/settings.local.json`
+- `skills/story-setup/references/templates/settings-hooks.json` を読み込み
+- ユーザープロジェクトの `.claude/settings.local.json`（存在する場合）を読み込み
+- hooks 設定をマージ（「settings-hooks.json マージアルゴリズム」に従って処理）
+- `.claude/settings.local.json` に書き込み
 
-### 2.7 创建部署标记
+### 2.7 デプロイマークの作成
 
-- 创建 `.story-deployed` 文件（sentinel file）
-- 写入以下字段（YAML `key: value` 格式，hook 用 `references/templates/hooks/lib/sentinel.sh` 读取）：
+- `.story-deployed` ファイル（sentinel file）を作成
+- 以下のフィールドを書き込み（YAML `key: value` 形式、hook は `references/templates/hooks/lib/sentinel.sh` で読み取り）：
   ```
   deployed_at: <date -u +"%Y-%m-%dT%H:%M:%SZ">
   agents_version: 13
@@ -112,94 +112,94 @@ metadata:
   resolver_strategy: project-local-skill-reference
   references_dir: .claude/skills/story-setup/references/agent-references
   ```
-- 此文件供 session-start.sh 和写作 skill 检测部署状态，避免重复提示
-- 同时创建一次性标记文件 `.claude/.agents-pending-restart`（空文件即可）。session-start.sh 在下一个会话启动时据此确认 agents 已随新会话注册，并自动删除该标记——用来向用户确认「重启已生效」。
-- 如果 `.story-deployed` 已存在但无 `agents_version` 或版本 < 13，提示用户重新运行 story-setup 以更新 hooks/agents/rules/reference bundle（具体变更见 `UPGRADING.md`）
+- このファイルは session-start.sh および執筆 skill がデプロイ状態を検出し、重複プロンプトを回避するために使用
+- 同時に一回限りのマークファイル `.claude/.agents-pending-restart`（空ファイルで可）を作成。session-start.sh は次のセッション起動時、これにより agents が新しいセッションで登録されたことを確認し、自動的にこのマークを削除——ユーザーに「再起動が有効になった」ことを伝える
+- `.story-deployed` が既に存在するが `agents_version` がない、またはバージョン < 13 の場合、story-setup の再実行を促し hooks/agents/rules/reference bundle を更新する（具体的な変更は `UPGRADING.md` 参照）
 
-## Phase 3：验证安装
+## Phase 3：インストール検証
 
-1. 验证 hooks 注册：
-   - 检查 `.claude/settings.local.json` 中的 hooks 字段是否正确
-   - 检查 `.claude/hooks/` 下的脚本是否存在且有执行权限
-   - 检查 `.claude/hooks/lib/common.sh` 与 `.claude/hooks/lib/sentinel.sh` 是否存在
-2. 验证 rules 路径：
-   - 检查 `.claude/rules/` 下的规则文件是否存在且包含 `paths` frontmatter
-3. 验证 agents：
-   - 检查 `.opencode/agents/` 下的 7 个 agent 定义文件是否存在
-4. 验证 agent reference bundle：
-   - 检查 `.claude/skills/story-setup/references/agent-references/` 下 reference 文件完整
-   - 检查所有 `story-setup/references/agent-references/<file>.md` 都能解析到 deployed bundle
-5. 验证部署标记：
-   - 检查 `.story-deployed` 是否存在且包含时间戳、`agents_version: 13`、`setup_skill_version: 1.2.2`、`target_cli`、`resolver_strategy`、`references_dir`
-6. 输出安装报告：
-   - 列出所有已部署的文件
-   - 列出需要注意的事项（如已有配置已合并）
-   - **⚠️ 重启提示（必须醒目输出）**：本次部署写入了 `.opencode/agents/`，但这些 custom agent 只在「会话启动」时才会被 Claude Code 注册成 `subagent_type`。**请新开一个 Claude Code 会话再开始写作**，否则当前会话里 story-review / story-long-write 等想 spawn `story-architect`、`narrative-writer` 等时会拿到「subagent_type 不可用」并降级 solo（单视角，失去多 agent 协作）。判断是否生效：新会话里跑 `/story-review`，报告头若是 `Effective Mode: full/lean` 即注册成功；若是 `Fallback: ... -> solo` 说明还在旧会话或未注册。
-   - 重启后即可使用 `/story-long-write` 或 `/story-short-write`
+1. hooks 登録の検証：
+   - `.claude/settings.local.json` 内の hooks フィールドが正しいか確認
+   - `.claude/hooks/` 下のスクリプトが存在し、実行権限があるか確認
+   - `.claude/hooks/lib/common.sh` と `.claude/hooks/lib/sentinel.sh` が存在するか確認
+2. rules パスの検証：
+   - `.claude/rules/` 下のルールファイルが存在し、`paths` frontmatter を含むか確認
+3. agents の検証：
+   - `.opencode/agents/` 下の 7 つの agent 定義ファイルが存在するか確認
+4. agent reference bundle の検証：
+   - `.claude/skills/story-setup/references/agent-references/` 下の reference ファイルが完全か確認
+   - すべての `story-setup/references/agent-references/<file>.md` がデプロイされた bundle に解決できるか確認
+5. デプロイマークの検証：
+   - `.story-deployed` が存在し、タイムスタンプ、`agents_version: 13`、`setup_skill_version: 1.2.2`、`target_cli`、`resolver_strategy`、`references_dir` を含むか確認
+6. インストールレポートを出力：
+   - デプロイ済みの全ファイルをリスト
+   - 注意すべき事項をリスト（既存設定がマージされた場合など）
+   - **⚠️ 再起動プロンプト（目立つように出力すること）**：今回のデプロイで `.opencode/agents/` に書き込みを行いましたが、これらのカスタム agent は「セッション起動時」にのみ Claude Code によって `subagent_type` として登録されます。**執筆を開始する前に新しい Claude Code セッションを開いてください**。そうしないと、現在のセッションでは story-review / story-long-write などが `story-architect`、`narrative-writer` などを spawn しようとしたときに「subagent_type が利用不可」となり solo（単一視点、マルチエージェント協働を失う）にフォールバックします。効果があったかどうかの判断：新しいセッションで `/story-review` を実行し、レポートヘッダーが `Effective Mode: full/lean` なら登録成功；`Fallback: ... -> solo` ならまだ古いセッションか未登録です。
+   - 再起動後、`/story-long-write` または `/story-short-write` が使用可能
 
 ---
 
-## 模板占位符
+## テンプレートプレースホルダー
 
-| 占位符 | 替换规则 | 示例 |
+| プレースホルダー | 置換ルール | 例 |
 |--------|----------|------|
-| `{项目名}` | 用户项目名称或目录名 | 《剑来》、《暗卫》 |
-| `{书名}` | 书名目录名（与目录一致） | 与 `{项目名}` 相同，或用户自定义 |
-| `{目标平台}` | 目标发布平台 | 起点、番茄、晋江、知乎盐言 |
-| `{作者名}` | 用户笔名或昵称 | 未指定时用「作者」 |
+| `{プロジェクト名}` | ユーザープロジェクト名またはディレクトリ名 | 「剣来」、「暗衛」 |
+| `{書名}` | 書名ディレクトリ名（ディレクトリと一致） | `{プロジェクト名}` と同じ、またはユーザー定義 |
+| `{ターゲットプラットフォーム}` | ターゲット公開プラットフォーム | 起点、番茄、晋江、知乎塩選 |
+| `{作者名}` | ユーザーのペンネームまたはニックネーム | 未指定時は「作者」 |
 
-替换时去掉花括号。如果用户未指定项目名，用当前目录名。未指定的占位符保留原样不替换。
+置換時は中括弧を削除。ユーザーがプロジェクト名を指定しない場合、現在のディレクトリ名を使用する。未指定のプレースホルダーはそのまま保持し、置換しない。
 
-## CLAUDE.md 合并策略
+## CLAUDE.md マージ戦略
 
-用户已有 CLAUDE.md 时，按 marker/section 合并：
-1. 优先识别 story-setup 管理块标记（如果旧项目已有标记，只替换标记内内容）
-2. 无标记时，读取用户现有 CLAUDE.md，按 `##` 标题切分为 section map
-3. 读取模板 CLAUDE.md.tmpl，同样切分
-4. 模板中的标准 section（Skill 路由表、文件结构、协作规则、Context Recovery、语言）**覆盖**用户同名 section
-5. 用户独有的 section（自定义内容）**保留**不动
-6. 未知冲突用 AskUserQuestion 让用户选择保留哪个版本
+ユーザーが既に CLAUDE.md を持っている場合、marker/section でマージ：
+1. story-setup 管理ブロックのマークを優先的に識別（旧プロジェクトにマークがあれば、マーク内のコンテンツのみ置換）
+2. マークがない場合、ユーザーの既存 CLAUDE.md を読み込み、`##` 見出しで section map に分割
+3. テンプレート CLAUDE.md.tmpl を読み込み、同様に分割
+4. テンプレート内の標準 section（Skill ルーティングテーブル、ファイル構造、協働ルール、Context Recovery、言語）はユーザーの同名 section を**上書き**
+5. ユーザー固有の section（カスタムコンテンツ）はそのまま**保持**
+6. 不明な競合は AskUserQuestion でユーザーにどちらのバージョンを残すか選択させる
 
-## settings-hooks.json 合并算法
+## settings-hooks.json マージアルゴリズム
 
-hooks 注册合并按 command 字段去重：
-1. 读取用户现有 `.claude/settings.local.json`（如存在），提取 hooks 部分
-2. 读取 `settings-hooks.json` 模板，提取要注册的 hooks
-3. 对每个 hook event（SessionStart、PreToolUse 等）：
-   - 用户已有的 hook command → 保留，不重复添加
-   - 模板中的新 hook command → append 到对应 event 的 hooks 数组
-   - 用户独有的其他配置（permissions、env 等）→ 完整保留
-4. 写入合并后的完整 settings.local.json
+hooks 登録マージは command フィールドで重複排除：
+1. ユーザーの既存 `.claude/settings.local.json`（存在する場合）を読み込み、hooks 部分を抽出
+2. `settings-hooks.json` テンプレートを読み込み、登録する hooks を抽出
+3. 各 hook event（SessionStart、PreToolUse など）に対して：
+   - ユーザーが既に持っている hook command → 保持、重複追加しない
+   - テンプレート内の新しい hook command → 対応する event の hooks 配列に append
+   - ユーザー固有のその他の設定（permissions、env など）→ 完全に保持
+4. マージ後の完全な settings.local.json を書き込み
 
-## 重新部署
+## 再デプロイ
 
-- `.story-deployed` 不存在 → 全新安装，Phase 2 全部执行
-- `.story-deployed` 存在且 `agents_version: 13` → 提示已部署，AskUserQuestion 确认是否重新部署
-- `.story-deployed` 存在但 `agents_version` < 13 → 提示需要更新，重新执行 Phase 2 覆盖 agents/hooks/rules/reference bundle，CLAUDE.md 和 settings.local.json 走合并策略
+- `.story-deployed` が存在しない → 新規インストール、Phase 2 を全て実行
+- `.story-deployed` が存在し `agents_version: 13` → デプロイ済みを表示、AskUserQuestion で再デプロイするか確認
+- `.story-deployed` が存在するが `agents_version` < 13 → アップデートが必要と表示、Phase 2 を再実行して agents/hooks/rules/reference bundle を上書き、CLAUDE.md と settings.local.json はマージ戦略を適用
 
 ---
 
 ## 参考资料
 
-| 文件 | 用途 |
+| ファイル | 用途 |
 |------|------|
-| references/templates/CLAUDE.md.tmpl | 项目根 CLAUDE.md 模板 |
-| references/templates/hooks/ | 7 个 hook 脚本模板 + `lib/common.sh`/`lib/sentinel.sh` |
-| references/templates/rules/ | 4 条 path-scoped 规则模板 |
-| references/templates/agents/ | 7 个 agent 定义模板（story-architect, character-designer, narrative-writer, consistency-checker, story-researcher, story-explorer, chapter-extractor） |
-| references/agent-references/ | Agent 模板自带的参考资料副本；部署到 `.claude/skills/story-setup/references/agent-references/`，避免跨 skill references |
-| references/templates/settings-hooks.json | hooks 注册 JSON 片段 |
-| references/templates/上下文.md.tmpl | 写作上下文模板 |
+| references/templates/CLAUDE.md.tmpl | プロジェクトルート CLAUDE.md テンプレート |
+| references/templates/hooks/ | 7 つの hook スクリプトテンプレート + `lib/common.sh`/`lib/sentinel.sh` |
+| references/templates/rules/ | 4 つの path-scoped ルールテンプレート |
+| references/templates/agents/ | 7 つの agent 定義テンプレート（story-architect, character-designer, narrative-writer, consistency-checker, story-researcher, story-explorer, chapter-extractor） |
+| references/agent-references/ | Agent テンプレートに付属する参考资料のコピー；`.claude/skills/story-setup/references/agent-references/` にデプロイし、他 skill の references への横断参照を回避 |
+| references/templates/settings-hooks.json | hooks 登録 JSON 断片 |
+| references/templates/上下文.md.tmpl | 執筆コンテキストテンプレート |
 
 ---
 
-## 流程衔接
+## フロー連携
 
-**流水线：** 部署
-**位置：** 初始化（最前置）
+**パイプライン：** デプロイ
+**位置：** 初期化（最優先）
 
-| 时机 | 跳转到 | 命令 |
+| タイミング | ジャンプ先 | コマンド |
 |---|---|---|
-| 部署完成，开始写作 | story-long-write / story-short-write | `/story-long-write` 或 `/story-short-write` |
-| 导入已有小说做拆解 | story-import | `/story-import` |
-| 需要浏览器登录态（扫榜/拆文取原文） | browser-cdp | `/browser-cdp` |
+| デプロイ完了、執筆開始 | story-long-write / story-short-write | `/story-long-write` または `/story-short-write` |
+| 既存小説をインポートして分析 | story-import | `/story-import` |
+| ブラウザのログイン状態が必要（スキャン/分析で原文取得） | browser-cdp | `/browser-cdp` |

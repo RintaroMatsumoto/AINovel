@@ -1,30 +1,30 @@
 #!/bin/bash
-# detect-story-gaps.sh — 检测写作项目中的 5 项缺口
-# 设计原则：无缺口时完全静默，不输出任何内容，避免污染 context
+# detect-story-gaps.sh — 執筆プロジェクトの 5 つのギャップを検出
+# 設計原則：ギャップがない場合は完全に沈黙し、何も出力しない。コンテキスト汚染を避ける
 set -euo pipefail
 
-# 加载公共函数库（project_root + discover_all_books）
+# 共通関数ライブラリを読み込み（project_root + discover_all_books）
 source "$(dirname "$0")/lib/common.sh"
 
-# 后续 awk 解析中文伏笔表 + find/grep 中文路径。Windows 中文系统若导出 GBK 区域设置，
-# gawk 会把 UTF-8 状态值按 GBK 多字节解码失败，trim 和 == 比较全乱、每行误报。强制 C
-# 区域走字节匹配（UTF-8 字面量 vs UTF-8 内容字节相等）才稳定（issue #164 同类）。本 hook
-# 无内嵌 python，可直接在顶部 export。
+# 後続のawkで中国語伏線表を解析 + find/grepで中国語パスを処理。Windows中国語システムでGBKロケールが
+# エクスポートされている場合、gawkはUTF-8状態値をGBKマルチバイトとしてデコード失敗し、trimや==比較が
+# すべて乱れ、各行で誤検出する。強制Cロケールでバイト一致（UTF-8リテラル vs UTF-8コンテンツのバイトが等しい）
+# なら安定（issue #164 同類）。本hookはpythonを内蔵していないので、トップで直接export可能。
 export LC_ALL=C
 
 ROOT=$(project_root)
 OUTPUT=""
 HAS_WARNINGS=false
 
-# 1. 新项目检测：没有书名目录（同时支持长篇和短篇项目）
-# bash 3.2 兼容：不用关联数组，由 discover_all_books 内部按顺序去重。
+# 1. 新規プロジェクト検出：書名ディレクトリがない（長編と短編プロジェクトの両方をサポート）
+# bash 3.2 互換：連想配列を使わず、discover_all_books内部で順序を保持したまま重複排除。
 declare -a BOOK_DIRS=()
 while IFS= read -r dir; do
   [ -n "$dir" ] && BOOK_DIRS+=("$dir")
 done < <(discover_all_books)
 
 if [ "${#BOOK_DIRS[@]}" -eq 0 ]; then
-  # 完全新项目，没有任何目录结构 — 静默退出
+  # 完全な新規プロジェクトで、ディレクトリ構造がない — 静かに終了
   exit 0
 fi
 
@@ -32,7 +32,7 @@ for BOOK_DIR in "${BOOK_DIRS[@]}"; do
   BOOK_NAME=$(basename "$BOOK_DIR")
   BOOK_OUTPUT=""
 
-  # 2. 正文多但设定少
+  # 2. 本文は多いが設定が少ない
   CHAPTER_COUNT=0
   SETTING_COUNT=0
   if [ -d "$BOOK_DIR/正文" ]; then
@@ -44,17 +44,17 @@ for BOOK_DIR in "${BOOK_DIRS[@]}"; do
     SETTING_COUNT=$(find "$BOOK_DIR/设定" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
   fi
   if [ "$CHAPTER_COUNT" -gt 10 ] && [ "$SETTING_COUNT" -lt 3 ]; then
-    BOOK_OUTPUT+="[WARN] ${BOOK_NAME}：正文 ${CHAPTER_COUNT} 章，但设定文件只有 ${SETTING_COUNT} 个，建议补充设定。\n"
+    BOOK_OUTPUT+="[WARN] ${BOOK_NAME}：本文 ${CHAPTER_COUNT} 章ですが、設定ファイルは ${SETTING_COUNT} 個のみです。設定の補充を推奨します。\n"
   fi
 
-  # 4. 过期或异常伏笔线索
+  # 4. 期限切れまたは異常な伏線
   if [ -f "$BOOK_DIR/追踪/伏笔.md" ]; then
-    # 仅检查表格数据行中的状态列。正常开放状态（未埋/已埋）不报警，
-    # 避免长篇项目每次 SessionStart 都触发全量伏笔审计。
-    # 行为回归脚本：scripts/check-hook-regex-sync.sh（区域设置健壮性由 export LC_ALL=C 保证）
+    # テーブルデータ行の状態列のみチェック。正常な開放状態（未埋/已埋）は警告しない。
+    # 長編プロジェクトでSessionStartのたびに全伏線監査がトリガーされるのを避ける。
+    # 動作回帰スクリプト：scripts/check-hook-regex-sync.sh（ロケール設定の堅牢性は export LC_ALL=C で保証）
     ABNORMAL_FORESHADOW=$(awk -F'|' '
-      # 含全角空格 U+3000：LC_ALL=C 下 [[:space:]] 只认 ASCII 空白，单元格用全角空格补白时
-      # 会留在 status 里被误判为异常；用交替补上全角空格（不能进字符组，否则触发跨区域 bug）。
+      # 全角スペースU+3000を含む：LC_ALL=Cでは[[:space:]]はASCII空白のみ認識。セルが全角スペースで埋められている場合
+      # statusに残って異常と誤判定される。代替で全角スペースを補う（文字グループに入れるとクロスロケールバグを誘発するため）。
       function trim(s) { gsub(/^([[:space:]]|　)+|([[:space:]]|　)+$/, "", s); return s }
       /^\|/ && $0 !~ /^\|[-[:space:]|]+$/ {
         status=trim($6)
@@ -63,33 +63,33 @@ for BOOK_DIR in "${BOOK_DIRS[@]}"; do
       }
     ' "$BOOK_DIR/追踪/伏笔.md" 2>/dev/null || true)
     if [ -n "$ABNORMAL_FORESHADOW" ]; then
-      BOOK_OUTPUT+="[WARN] ${BOOK_NAME}：伏笔.md 中检测到过期或异常的伏笔条目，建议跑 /story-review lean 或做一次伏笔审计。\n"
+      BOOK_OUTPUT+="[WARN] ${BOOK_NAME}：伏笔.md に期限切れまたは異常な伏線エントリが検出されました。/story-review lean を実行するか、伏線監査を実施してください。\n"
     fi
   fi
 
-  # 5. 大纲缺失（按项目类型区分判定）
+  # 5. プロット欠落（プロジェクトタイプごとに判定を分岐）
   if [ -d "$BOOK_DIR/正文" ] || [ -f "$BOOK_DIR/正文.md" ]; then
-    # 长篇判定：有 追踪/ 视为长篇，要求 大纲/ 目录
+    # 長編判定：追踪/ がある場合は長編と見なし、大纲/ ディレクトリを要求
     if [ -d "$BOOK_DIR/追踪" ] && [ ! -d "$BOOK_DIR/大纲" ]; then
-      BOOK_OUTPUT+="[WARN] ${BOOK_NAME}：已有 正文/ 但缺少 大纲/，建议先搭大纲。\n"
-    # 短篇判定：无 追踪/ 视为短篇，要求 小节大纲.md 单文件
+      BOOK_OUTPUT+="[WARN] ${BOOK_NAME}：正文/ はありますが 大纲/ が不足しています。先にプロットを構築してください。\n"
+    # 短編判定：追踪/ がない場合は短編と見なし、小节大纲.md 単一ファイルを要求
     elif [ ! -d "$BOOK_DIR/追踪" ] && [ ! -f "$BOOK_DIR/小节大纲.md" ]; then
-      BOOK_OUTPUT+="[WARN] ${BOOK_NAME}：已有正文但缺少 小节大纲.md，建议先搭大纲。\n"
+      BOOK_OUTPUT+="[WARN] ${BOOK_NAME}：本文はありますが 小节大纲.md が不足しています。先にプロットを構築してください。\n"
     fi
   fi
 
-  # 仅在有问题时输出该书目的信息
+  # 問題がある場合のみその書籍の情報を出力
   if [ -n "$BOOK_OUTPUT" ]; then
     OUTPUT+="检查：$BOOK_NAME\n$BOOK_OUTPUT"
     HAS_WARNINGS=true
   fi
 done
 
-# 3. 全局拆文未完成检测（项目级，非书目级）
+# 3. 全体分析未完了検出（プロジェクトレベル、書籍レベルではない）
 GLOBAL_PROGRESS_OUTPUT=""
 if [ -d "$ROOT/拆文库" ]; then
   while IFS= read -r -d '' progress_file; do
-    GLOBAL_PROGRESS_OUTPUT+="[WARN] 拆文未完成：${progress_file#$ROOT/}，运行 /story-long-analyze 继续。\n"
+    GLOBAL_PROGRESS_OUTPUT+="[WARN] 分析未完了：${progress_file#$ROOT/}。実行 /story-long-analyze で続行。\n"
   done < <(find "$ROOT/拆文库" -name "_progress.md" -print0 2>/dev/null || true)
 fi
 if [ -n "$GLOBAL_PROGRESS_OUTPUT" ]; then
@@ -97,7 +97,7 @@ if [ -n "$GLOBAL_PROGRESS_OUTPUT" ]; then
   HAS_WARNINGS=true
 fi
 
-# 仅在有警告时输出
+# 警告がある場合のみ出力
 if [ "$HAS_WARNINGS" = true ]; then
-  printf '%b' "=== 写作缺口检测 ===\n$OUTPUT\n"
+  printf '%b' "=== 執筆ギャップ検出 ===\n$OUTPUT\n"
 fi

@@ -157,16 +157,16 @@ Part1（第一部）：百合子34・誠40・栞14・翼11
 
 Gitで各バージョンを管理: `git add . && git commit -m "第X巻 完了"`
 
-## 使用可能なAgent（.agents/agents/）
+## 使用可能なAgent（.opencode/agents/）
 | Agent | モデル | 役割 |
 |-------|--------|------|
-| story-architect | Opus | 故事架构·题材定位·構成·反转设计 |
-| character-designer | Sonnet | 角色设计·档案·语言风格·动机链 |
-| narrative-writer | Sonnet | 正文写作·去AI味·格式合规 |
-| consistency-checker | Haiku | 事实冲突扫描·伏笔追踪·整合性报告 |
-| story-researcher | Sonnet | 资料研究·多源交叉验证·结构化参考输出 |
-| story-explorer | Haiku | 故事查询·角色/伏笔/设定/进度只读 |
-| chapter-extractor | Haiku | 章节提取·摘要+情节点+角色提及 |
+| story-architect | Opus | 物語設計・題材定位・構成・反転設計 |
+| character-designer | Sonnet | キャラ設計・プロファイル・言語スタイル・動機連鎖 |
+| narrative-writer | Sonnet | 本文執筆・AI臭除去・書式チェック |
+| consistency-checker | Haiku | 事実矛盾スキャン・伏線追跡・整合性レポート |
+| story-researcher | Sonnet | 資料調査・多源クロス検証・構造化参考出力 |
+| story-explorer | Haiku | 物語照会・キャラ/伏線/設定/進捗 読み取り専用 |
+| chapter-extractor | Haiku | 章抽出・要約＋情節点＋キャラ言及 |
 
 ## ルール（.agents/rules/）
 - `story-consistency.md` — 設定・伏線・時間線の整合性

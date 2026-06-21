@@ -2,8 +2,8 @@
 name: story-cover
 version: 1.0.0
 description: |
-  小说封面生成。根据书名、作者名自动分析题材风格，调用 GPT-Image-2 直接生成含标题和署名的专业级网文封面。
-  触发方式：/story-cover、/封面、「帮我做个封面」「生成封面图」「做个小说封面」「封面设计」
+  小説表紙生成。書名・著者名から自動的に題材スタイルを分析し、GPT-Image-2 を呼び出してタイトルと著者名入りのプロ級ネット小説表紙を直接生成する。
+  トリガー方法：/story-cover、/封面、「表紙を作って」「表紙画像を生成」「小説の表紙を作る」「表紙デザイン」
 metadata:
   openclaw:
     requires:
@@ -17,158 +17,158 @@ metadata:
     source: https://github.com/worldwonderer/oh-story-claudecode
 ---
 
-# story-cover：小说封面生成
+# story-cover：小説表紙生成
 
-你是小说封面设计师。根据书名和题材，调用 GPT-Image-2 一次性生成包含书名和作者名的完整封面。
+あなたは小説表紙デザイナーです。書名と題材に基づき、GPT-Image-2 を呼び出して書名・著者名入りの完全な表紙を1回で生成します。
 
-**核心原则：封面是读者的第一印象，一眼传达题材和氛围。**
+**核心原則：表紙は読者の第一印象。一目で題材と雰囲気を伝える。**
 
 ---
 
-## 环境变量
+## 環境変数
 
-| 变量 | 必填 | 默认 | 说明 |
+| 変数 | 必須 | デフォルト | 説明 |
 |:-----|:----:|:-----|:-----|
-| `GPT_IMAGE_API_KEY` | ✅ | — | OpenAI 或兼容代理的 API Key |
-| `GPT_IMAGE_BASE_URL` | | `https://api.openai.com/v1` | 兼容代理时改这个 |
-| `GPT_IMAGE_MODEL` | | `gpt-image-2` | 仅在测试新模型时覆盖 |
-| `GPT_IMAGE_SIZE` | | `1024x1536` | gpt-image-2 要求两边为 16 倍数、比例 ≤ 3:1 |
-| `BOOK_DIR` | ✅ | — | 输出目录，建议 `./covers/<书名>` |
-| `REF_IMAGE` | | — | 参考图本地路径或 URL；设置后走 `images/edits` 图生图 |
+| `GPT_IMAGE_API_KEY` | ✅ | — | OpenAI または互換プロキシの API Key |
+| `GPT_IMAGE_BASE_URL` | | `https://api.openai.com/v1` | 互換プロキシ使用時にこれを変更 |
+| `GPT_IMAGE_MODEL` | | `gpt-image-2` | 新しいモデルをテストする場合のみ上書き |
+| `GPT_IMAGE_SIZE` | | `1024x1536` | gpt-image-2 は両辺が16の倍数、比率 ≤ 3:1 が必要 |
+| `BOOK_DIR` | ✅ | — | 出力ディレクトリ。推奨 `./covers/<書名>` |
+| `REF_IMAGE` | | — | 参照画像のローカルパスまたはURL；設定すると `images/edits` の画像生成になる |
 
-> 备注：`gpt-image-2` 始终返回 base64，请求体不要带 `response_format`（旧 DALL-E 参数，gpt-image 系列不支持）。
+> 注：`gpt-image-2` は常に base64 を返す。リクエストボディに `response_format` を含めないこと（旧 DALL-E のパラメータで、gpt-image シリーズは非対応）。
 
 ---
 
-## 生成流程
+## 生成フロー
 
-### Step 1：收集信息
+### Step 1：情報収集
 
-必填：书名、作者名（笔名）、目标平台、输出目录 `BOOK_DIR`（建议 `./covers/<书名>`，调用前 export）
-选填：参考图 `REF_IMAGE`（本地路径或 URL，设置后切换到图生图）、风格偏好、尺寸（默认竖版 1024x1536）
+必須：書名、著者名（ペンネーム）、ターゲットプラットフォーム、出力ディレクトリ `BOOK_DIR`（推奨 `./covers/<書名>`、呼び出し前に export）
+任意：参照画像 `REF_IMAGE`（ローカルパスまたはURL、設定すると画像生成に切替）、スタイル好み、サイズ（デフォルト縦型 1024x1536）
 
-**根据目标平台确定封面风格**，加载 [references/cover-styles.md](references/cover-styles.md) 获取详细平台和题材风格。
+**ターゲットプラットフォームに応じて表紙スタイルを決定**。[references/cover-styles.md](references/cover-styles.md) を読み込み、詳細なプラットフォームと題材スタイルを取得。
 
-### Step 1.5：题材判定
+### Step 1.5：題材判定
 
-扫描书名（必要时简介）中的关键词，对照 [references/cover-styles.md](references/cover-styles.md) 的「题材推断规则」表选定题材。
+書名（必要に応じて紹介文）内のキーワードをスキャンし、[references/cover-styles.md](references/cover-styles.md) の「題材推測ルール」表と照らし合わせて題材を決定。
 
-- 单题材命中 → 直接采用
-- 多题材命中 → 按优先级取一：仙侠 > 西幻 > 古言 > 现言 > 都市 > 悬疑 > 科幻 > 历史 > 灵异 > 轻小说
-- 零命中 → 默认 `都市`
+- 単一題材ヒット → 直接採用
+- 複数題材ヒット → 優先順位に従って一つを選択：仙侠 > 西幻 > 古言 > 現言 > 都市 > 懸疑 > 科幻 > 歴史 > 霊異 > 軽小説
+- ゼロヒット → デフォルト `都市`
 
-### Step 2：构建提示词
+### Step 2：プロンプト構築
 
-提示词 = **文字层** + **风格层** + **画面层**，全部用英文编写。
+プロンプト = **文字レイヤー** + **スタイルレイヤー** + **画面レイヤー**、全て英語で記述。
 
-#### 文字层：书名 + 作者名字体设计
+#### 文字レイヤー：書名 + 著者名のフォントデザイン
 
-在提示词中直接包含中文书名和作者名，GPT-Image-2 可直接渲染。**重点描述字体风格**：
+プロンプト内に直接中国語の書名と著者名を含める。GPT-Image-2 が直接レンダリング可能。**フォントスタイルを重点的に記述**：
 
 ```
-Title text '书名' at top center in [书名字体风格].
-Author name '作者名' at bottom center in [作者名字体风格].
+Title text '書名' at top center in [書名フォントスタイル].
+Author name '著者名' at bottom center in [著者名フォントスタイル].
 ```
 
-#### 书名字体风格
+#### 書名フォントスタイル
 
-| 题材 | 描述关键词 |
+| 題材 | 説明キーワード |
 |:-----|:-----------|
-| 玄幻/仙侠 | `bold golden brush calligraphy with metallic glow and sharp strokes` |
+| ファンタジー/仙侠 | `bold golden brush calligraphy with metallic glow and sharp strokes` |
 | 都市 | `modern bold sans-serif with metallic silver finish` |
-| 古言/宫斗 | `elegant golden traditional Kai script with ornate decoration` |
-| 现言/甜宠 | `soft rounded handwritten style in white with pink glow` |
-| 悬疑/推理 | `distorted bold cracked letters in blood red` |
-| 科幻/末世 | `neon glowing futuristic font in electric blue` |
-| 西幻 | `metallic embossed fantasy lettering with glow effect` |
-| 历史/军事 | `heavy stone-carved seal script in deep red` |
-| 灵异/恐怖 | `eerie dripping handwritten font in sickly green` |
-| 轻小说 | `colorful cartoon outlined bubbly font` |
+| 古代言情/宮廷 | `elegant golden traditional Kai script with ornate decoration` |
+| 現代言情/甘々 | `soft rounded handwritten style in white with pink glow` |
+| サスペンス/推理 | `distorted bold cracked letters in blood red` |
+| SF/終末 | `neon glowing futuristic font in electric blue` |
+| 西洋ファンタジー | `metallic embossed fantasy lettering with glow effect` |
+| 歴史/軍事 | `heavy stone-carved seal script in deep red` |
+| 霊異/ホラー | `eerie dripping handwritten font in sickly green` |
+| 軽小説 | `colorful cartoon outlined bubbly font` |
 
-#### 作者名字体风格（重点：作者名必须精心设计，不能只是"小字"）
+#### 著者名フォントスタイル（重点：著者名は単なる「小さな文字」ではなく、丁寧にデザインすること）
 
-作者名虽小，但是封面专业感的关键。必须指定：**字体 + 颜色 + 装饰元素**，让作者名与书名风格呼应但不抢焦点。
+著者名は小さいが、表紙のプロフェッショナル感の鍵。以下の指定が必要：**フォント + 色 + 装飾要素**により、著者名が書名スタイルと呼応しつつ焦点を奪わないようにする。
 
-| 题材 | 作者名风格提示词 |
+| 題材 | 著者名スタイルプロンプト |
 |:-----|:----------------|
-| 玄幻/仙侠 | `small refined white serif text with faint golden glow, flanked by delicate cloud-scroll ornaments on both sides, resting on a thin horizontal gold line` |
+| ファンタジー/仙侠 | `small refined white serif text with faint golden glow, flanked by delicate cloud-scroll ornaments on both sides, resting on a thin horizontal gold line` |
 | 都市 | `small clean white modern text with subtle drop shadow, positioned above a thin silver horizontal divider line` |
-| 古言/宫斗 | `small elegant dark red traditional text inside a thin golden rectangular border frame with corner decorations` |
-| 现言/甜宠 | `small soft pink-white handwritten text with a tiny heart motif on the left side, light sparkle effect` |
-| 悬疑/推理 | `small pale grey text with slight blur effect, almost hidden in the shadows, a thin cracked line underneath` |
-| 科幻/末世 | `small crisp white monospace text with subtle cyan scanline overlay, flanked by small geometric brackets` |
-| 西幻 | `small bronze medieval script text with aged parchment texture, enclosed in a small decorative shield or banner shape` |
-| 历史/军事 | `small dignified white Song typeface text above a double horizontal line in dark red` |
-| 灵异/恐怖 | `small faded grey-green text slightly tilted, with a thin dripping ink line above` |
-| 轻小说 | `small playful rounded white text with pastel color outline, tiny star decorations on both sides` |
+| 古代言情/宮廷 | `small elegant dark red traditional text inside a thin golden rectangular border frame with corner decorations` |
+| 現代言情/甘々 | `small soft pink-white handwritten text with a tiny heart motif on the left side, light sparkle effect` |
+| サスペンス/推理 | `small pale grey text with slight blur effect, almost hidden in the shadows, a thin cracked line underneath` |
+| SF/終末 | `small crisp white monospace text with subtle cyan scanline overlay, flanked by small geometric brackets` |
+| 西洋ファンタジー | `small bronze medieval script text with aged parchment texture, enclosed in a small decorative shield or banner shape` |
+| 歴史/軍事 | `small dignified white Song typeface text above a double horizontal line in dark red` |
+| 霊異/ホラー | `small faded grey-green text slightly tilted, with a thin dripping ink line above` |
+| 軽小説 | `small playful rounded white text with pastel color outline, tiny star decorations on both sides` |
 
-**作者名通用规则**：
-- 大小：`small`（不能太大抢书名焦点，也不能太小看不清）
-- 位置：`at bottom center`，与画面底部保持适当间距
-- 必须有装饰元素：线条/边框/小图标/光效中至少一种
-- 颜色与背景形成对比但不刺眼
+**著者名共通ルール**：
+- サイズ：`small`（書名の焦点を奪わない大きさであり、かつ小さすぎて見えないこともないよう）
+- 位置：`at bottom center`、画面下部と適度な間隔を保持
+- 装飾要素必須：ライン/枠線/小アイコン/光沢のうち少なくとも1つ
+- 背景とコントラストを形成する色であるが、眩しくない
 
-#### 风格层：平台风格
+#### スタイルレイヤー：プラットフォームスタイル
 
-平台风格的描述关键词统一来自 [references/cover-styles.md](references/cover-styles.md) 的「平台风格」节，按目标平台直接取对应关键词串使用，不在本文件维护副本以免与参考文件漂移。
+プラットフォームスタイルの説明キーワードは全て [references/cover-styles.md](references/cover-styles.md) の「プラットフォームスタイル」節から取得し、ターゲットプラットフォームに応じて対応するキーワード文字列を直接使用する。本ファイル内にコピーを保持すると参考ファイルと乖離するため避ける。
 
-#### 画面层：题材 + 构图
+#### 画面レイヤー：題材 + 構図
 
-从 [references/cover-styles.md](references/cover-styles.md) 读取题材对应的风格标签、色彩、人物、背景描述。
+[references/cover-styles.md](references/cover-styles.md) から題材に対応するスタイルタグ、色彩、人物、背景説明を読み取る。
 
-构图变体（首次输出 2-3 个方案）：
+構図バリエーション（初回は 2-3 案を出力）：
 
-| 方案 | 构图 | 适合题材 |
+| 案 | 構図 | 適した題材 |
 |:-----|:-----|:---------|
-| A | 人物特写 + 场景 | 全题材通用 |
-| B | 全身像 + 动态姿势 | 玄幻、都市、西幻 |
-| C | 纯场景/氛围图 | 悬疑、科幻、历史 |
+| A | 人物クローズアップ + シーン | 全題材共通 |
+| B | 全身 + 動的ポーズ | ファンタジー、都市、西洋ファンタジー |
+| C | 純シーン/雰囲気 | サスペンス、SF、歴史 |
 
-#### 完整提示词模板
+#### 完全プロンプトテンプレート
 
 ```
-Chinese web novel cover design, [平台风格].
-Title text '{书名}' at top center in [书名字体风格].
-Author name '{作者名}' at bottom center in [作者名字体风格 — 从上表选择].
-[题材风格标签]. [人物描述]. [背景描述].
-[色彩指令]. [光效指令].
+Chinese web novel cover design, [プラットフォームスタイル].
+Title text '{書名}' at top center in [書名フォントスタイル].
+Author name '{著者名}' at bottom center in [著者名フォントスタイル — 上表から選択].
+[題材スタイルタグ]. [人物説明]. [背景説明].
+[色彩指示]. [光沢指示].
 Professional book cover, high detail digital painting, portrait 2:3 ratio, no watermark
 ```
 
-#### 提示词技巧（实测验证）
+#### プロンプトテクニック（実測済み）
 
-- 人物描述越具体越好：服饰、姿态、发型、表情、道具每个维度都指定
-- 背景分层：前景（人物）→ 中景（场景）→ 远景（氛围）
-- 光效是指定光源方向 + 颜色（如 `dramatic golden light from above`）
-- 用 `digital painting style` 而非 `photo`，避免真人照片感
+- 人物説明は具体的であればあるほど良い：服装、姿勢、髪型、表情、小道具の各次元を指定
+- 背景のレイヤー分け：前景（人物）→ 中景（シーン）→ 遠景（雰囲気）
+- 光沢は光源方向 + 色を指定（例 `dramatic golden light from above`）
+- `digital painting style` を使用し、`photo` は避ける（実写風を防ぐ）
 
-### Step 3：调用 API 并保存
+### Step 3：API 呼び出しと保存
 
-`gpt-image-2` 始终返回 base64，请求体不要带 `response_format`。`$PROMPT` 为 Step 2 拼出的完整提示词。
+`gpt-image-2` は常に base64 を返す。リクエストボディに `response_format` を含めない。`$PROMPT` は Step 2 で組み立てた完全なプロンプト。
 
-两种调用方式二选一：未设置 `REF_IMAGE` → 走「文生图」；设置了 → 走「图生图」。
+2つの呼び出し方式から選択：`REF_IMAGE` 未設定 → 「テキスト→画像」；設定あり → 「画像→画像」。
 
-#### 文生图（默认）
+#### テキスト→画像（デフォルト）
 
 ```bash
 set -euo pipefail
-: "${GPT_IMAGE_API_KEY:?请设置 export GPT_IMAGE_API_KEY=你的key}"
-: "${PROMPT:?请先 export PROMPT=Step 2 拼好的完整提示词}"
+: "${GPT_IMAGE_API_KEY:?export GPT_IMAGE_API_KEY=あなたのキーを設定}"
+: "${PROMPT:?export PROMPT=Step 2 で組み立てた完全なプロンプト}"
 BASE_URL="${GPT_IMAGE_BASE_URL:-https://api.openai.com/v1}"
 MODEL="${GPT_IMAGE_MODEL:-gpt-image-2}"
 SIZE="${GPT_IMAGE_SIZE:-1024x1536}"
-BOOK_DIR="${BOOK_DIR:?请先 export BOOK_DIR=./covers/<书名>}"
+BOOK_DIR="${BOOK_DIR:?export BOOK_DIR=./covers/<書名>}"
 
 mkdir -p "$BOOK_DIR/封面"
 
-# 自增版本号，避免覆盖之前生成的封面
+# バージョン番号を自動インクリメント、以前の表紙を上書きしない
 i=1
 while [ -f "$BOOK_DIR/封面/封面_v${i}.png" ]; do i=$((i+1)); done
 OUT="$BOOK_DIR/封面/封面_v${i}.png"
 RESP=$(mktemp)
 trap 'rm -f "$RESP"' EXIT
 
-# 用 jq 拼 JSON 体，避免 PROMPT 里的引号/换行/中文把 shell 字符串撑破
+# jq で JSON ボディを組み立て、PROMPT 内の引用符/改行/中国語がシェル文字列を破壊しないようにする
 BODY=$(jq -n \
   --arg m "$MODEL" \
   --arg p "$PROMPT" \
@@ -181,41 +181,41 @@ curl -fsS --max-time 180 --retry 2 --retry-delay 5 \
   -H "Content-Type: application/json" \
   -d "$BODY" > "$RESP"
 
-# API 出错时早退，避免把 error JSON 当成 base64 写成损坏 PNG
+# API エラー時は早期終了、error JSON を base64 と誤認して破損 PNG を書き込まない
 if jq -e '.error' "$RESP" >/dev/null 2>&1; then
   echo "API error:" >&2
   jq '.error' "$RESP" >&2
   exit 1
 fi
 
-# `// empty` 让缺失字段输出空串而非 "null"，配合下面的 -s 检查避免写出 3 字节假 PNG
+# `// empty` で欠損フィールドに "null" ではなく空文字を出力、下の -s チェックで 3 バイトの偽 PNG を防ぐ
 jq -er '.data[0].b64_json // empty' "$RESP" | base64 --decode > "$OUT"
 [ -s "$OUT" ] || { echo "empty or malformed output: $OUT" >&2; head -c 300 "$RESP" >&2; exit 1; }
 
-# 落地提示词副本，方便迭代时基于上一次微调
+# プロンプトのコピーを保存、次回の反復時に前回から微調整可能
 printf '%s\n' "$PROMPT" > "${OUT%.png}.prompt.txt"
 
 file "$OUT"
 ls -lt "$BOOK_DIR/封面/"
 ```
 
-#### 图生图（提供参考图时）
+#### 画像→画像（参照画像提供時）
 
-`/v1/images/edits` 走 `multipart/form-data`，**不能** 用 `Content-Type: application/json`。文本字段用 `--form-string`（避免 `@` 被误判为文件引用），图片字段用 `-F image=@path`。
+`/v1/images/edits` は `multipart/form-data` を使用する。**`Content-Type: application/json` は不可**。テキストフィールドは `--form-string`（`@` がファイル参照と誤判定されるのを防止）、画像フィールドは `-F image=@path` を使用。
 
 ```bash
 set -euo pipefail
-: "${GPT_IMAGE_API_KEY:?请设置 export GPT_IMAGE_API_KEY=你的key}"
-: "${PROMPT:?请先 export PROMPT=Step 2 拼好的完整提示词}"
+: "${GPT_IMAGE_API_KEY:?export GPT_IMAGE_API_KEY=あなたのキーを設定}"
+: "${PROMPT:?export PROMPT=Step 2 で組み立てた完全なプロンプト}"
 BASE_URL="${GPT_IMAGE_BASE_URL:-https://api.openai.com/v1}"
 MODEL="${GPT_IMAGE_MODEL:-gpt-image-2}"
 SIZE="${GPT_IMAGE_SIZE:-1024x1536}"
-BOOK_DIR="${BOOK_DIR:?请先 export BOOK_DIR=./covers/<书名>}"
-REF_IMAGE="${REF_IMAGE:?请先 export REF_IMAGE=本地路径或 URL}"
+BOOK_DIR="${BOOK_DIR:?export BOOK_DIR=./covers/<書名>}"
+REF_IMAGE="${REF_IMAGE:?export REF_IMAGE=ローカルパスまたはURL}"
 
 mkdir -p "$BOOK_DIR/封面"
 
-# 自增版本号
+# バージョン番号を自動インクリメント
 i=1
 while [ -f "$BOOK_DIR/封面/封面_v${i}.png" ]; do i=$((i+1)); done
 OUT="$BOOK_DIR/封面/封面_v${i}.png"
@@ -223,7 +223,7 @@ RESP=$(mktemp)
 REF_TMP=""
 trap '[ -n "$REF_TMP" ] && rm -f "$REF_TMP"; rm -f "$RESP"' EXIT
 
-# URL 先下载到临时文件，本地路径直接用。用裸 mktemp 以保证 macOS/Linux 行为一致。
+# URL は一時ファイルにダウンロード、ローカルパスは直接使用。macOS/Linux で一貫した動作のため素の mktemp を使用。
 case "$REF_IMAGE" in
   http://*|https://*)
     REF_TMP=$(mktemp)
@@ -231,7 +231,7 @@ case "$REF_IMAGE" in
     REF_LOCAL="$REF_TMP"
     ;;
   *)
-    [ -f "$REF_IMAGE" ] || { echo "参考图不存在: $REF_IMAGE" >&2; exit 1; }
+    [ -f "$REF_IMAGE" ] || { echo "参照画像が存在しません: $REF_IMAGE" >&2; exit 1; }
     REF_LOCAL="$REF_IMAGE"
     ;;
 esac
@@ -250,7 +250,7 @@ if jq -e '.error' "$RESP" >/dev/null 2>&1; then
   exit 1
 fi
 
-# `// empty` 让缺失字段输出空串而非 "null"，配合 -s 检查避免写出 3 字节假 PNG
+# `// empty` で欠損フィールドに "null" ではなく空文字を出力、-s チェックで 3 バイトの偽 PNG を防ぐ
 jq -er '.data[0].b64_json // empty' "$RESP" | base64 --decode > "$OUT"
 [ -s "$OUT" ] || { echo "empty or malformed output: $OUT" >&2; head -c 300 "$RESP" >&2; exit 1; }
 
@@ -261,28 +261,28 @@ file "$OUT"
 ls -lt "$BOOK_DIR/封面/"
 ```
 
-### Step 4：质量检查 + 迭代
+### Step 4：品質チェック + 反復
 
-| 检查项 | 标准 |
+| チェック項目 | 基準 |
 |:-------|:-----|
-| 文字渲染 | 书名清晰可辨，字体风格匹配题材 |
-| 题材匹配 | 视觉风格与书名题材一致 |
-| 构图合理 | 主体突出，文字不遮挡核心画面 |
-| 平台适配 | 符合目标平台的封面风格调性 |
+| 文字レンダリング | 書名が明確に判読可能、フォントスタイルが題材にマッチ |
+| 題材マッチ | ビジュアルスタイルが書名の題材と一致 |
+| 構図の妥当性 | 主体が強調され、文字が核心画面を遮らない |
+| プラットフォーム適合 | ターゲットプラットフォームの表紙スタイル調性に適合 |
 
-不满意时调整方向：更换构图、调整色调、换字体风格、换平台风格。
+不満がある場合の調整方向：構図の変更、色調の調整、フォントスタイルの変更、プラットフォームスタイルの変更。
 
 ---
 
 ## 参考资料
 
-| 文件 | 何时加载 |
+| ファイル | いつ読み込むか |
 |:-----|:---------|
-| [references/cover-styles.md](references/cover-styles.md) | 题材→视觉风格映射、平台风格详情、提示词模板 |
+| [references/cover-styles.md](references/cover-styles.md) | 題材→ビジュアルスタイルマッピング、プラットフォームスタイル詳細、プロンプトテンプレート |
 
 ---
 
-## 语言
+## 言語
 
-- 跟随用户的语言回复，用户用什么语言就用什么语言回复
-- 中文回复遵循《中文文案排版指北》
+- ユーザーの言語に従って返信する。ユーザーが使用する言語で返信。
+- 中国語の返信は《中文文案排版指北》に従う。

@@ -1,40 +1,40 @@
 #!/bin/bash
-# session-start.sh — 显示项目状态和写作上下文摘要
-# 设计原则：无可用信息时完全静默，不输出任何内容，避免污染 context
+# session-start.sh — プロジェクト状態と執筆コンテキストの概要表示
+# 設計原則：利用可能な情報がない場合は完全に沈黙し、何も出力しない。コンテキスト汚染を避ける
 set -euo pipefail
 
 HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
 OUTPUT=""
 HAS_CONTENT=false
 
-# 先做最小 preflight，再 source；否则 lib 缺失时无法输出可修复提示。
+# 最小限のpreflightを先に実行し、その後source。そうしないとlib欠落時に修復可能なヒントを出力できない。
 if [ ! -f "$HOOK_DIR/lib/common.sh" ] || [ ! -f "$HOOK_DIR/lib/sentinel.sh" ]; then
-  printf '%b' "[WARN] story hook 函数库缺失。重新运行 /story-setup 恢复 .claude/hooks/lib/。\n"
+  printf '%b' "[WARN] story hook 関数ライブラリが不足しています。再実行 /story-setup で .claude/hooks/lib/ を復元してください。\n"
   exit 0
 fi
 
-# 加载公共函数库
+# 共通関数ライブラリを読み込み
 source "$HOOK_DIR/lib/common.sh"
 source "$HOOK_DIR/lib/sentinel.sh"
 
-# 字节稳定区域：本 hook 经 discover_active_book 处理中文书名/路径。Windows 中文系统若导出
-# GBK 区域设置，locale 敏感操作会按多字节错解 UTF-8。强制 C 区域走字节处理才稳（issue #164
-# 同类）。本 hook 无内嵌 python，可直接 export。
+# バイト安定領域：このhookはdiscover_active_bookで中国語の書名/パスを処理する。Windows中国語システムで
+# GBKロケールがエクスポートされている場合、ロケール依存操作はUTF-8をマルチバイトとして誤ってデコードする。強制的にCロケールでバイト処理すれば安定（issue #164
+# 同類）。本hookはpythonを内蔵していないので、直接export可能。
 export LC_ALL=C
 
 ROOT=$(project_root)
 
-# story-setup 部署后的一次性重启确认。custom agents 只在会话启动时被注册成
-# subagent_type；story-setup 部署完会留下 .claude/.agents-pending-restart 标记。
-# 走到这里说明已是新会话、agents 已随会话重新加载——确认并清除标记（一次性）。
+# story-setup デプロイ後の一度限りの再起動確認。custom agentsはセッション起動時にのみ
+# subagent_typeとして登録される。story-setupのデプロイ完了後、.claude/.agents-pending-restartマーカーが残る。
+# ここまで来たということは新セッションであり、agentsはセッションとともに再読み込み済み——確認してマーカーをクリア（一度限り）。
 if [ -f "$ROOT/.claude/.agents-pending-restart" ]; then
-  OUTPUT+="[INFO] story-setup 刚部署/更新了 agents，本会话已重新加载——story-architect、narrative-writer 等 custom agent 现已注册可用。\n"
-  OUTPUT+="  若写作 skill 仍提示 spawn 失败 / 降级 solo，说明你还在部署时的旧会话里，请再新开一个 Claude Code 会话。\n\n"
+  OUTPUT+="[INFO] story-setup が agents をデプロイ/更新しました。本セッションは再読み込み済み——story-architect、narrative-writer 等の custom agent が登録され利用可能です。\n"
+  OUTPUT+="  執筆 skill がまだ spawn 失敗 / solo 降格を表示する場合、デプロイ時の古いセッションにいる可能性があります。新しい Claude Code セッションを開き直してください。\n\n"
   HAS_CONTENT=true
   rm -f "$ROOT/.claude/.agents-pending-restart" 2>/dev/null || true
 fi
 
-# 部署自检：.story-deployed 存在但 hooks 文件被误删时发出警告
+# デプロイ自己チェック：.story-deployed は存在するが hooks ファイルが誤って削除された場合に警告
 if sentinel_exists "$ROOT/.story-deployed"; then
   MISSING_HOOKS=""
   for hook in session-start.sh session-end.sh detect-story-gaps.sh pre-compact.sh post-compact.sh validate-story-commit.sh guard-outline-before-prose.sh lib/common.sh lib/sentinel.sh; do
@@ -43,20 +43,20 @@ if sentinel_exists "$ROOT/.story-deployed"; then
     fi
   done
   if [ -n "$MISSING_HOOKS" ]; then
-    OUTPUT+="[WARN] .story-deployed 存在但缺少 hook：$MISSING_HOOKS\n"
-    OUTPUT+="  修复：重新运行 /story-setup 恢复缺失的 hook。\n\n"
+    OUTPUT+="[WARN] .story-deployed は存在しますが hook が不足：$MISSING_HOOKS\n"
+    OUTPUT+="  修復：再実行 /story-setup で不足している hook を復元してください。\n\n"
     HAS_CONTENT=true
   fi
 
   AGENTS_VERSION=$(read_sentinel_field agents_version "$ROOT/.story-deployed")
   case "$AGENTS_VERSION" in
     ''|*[!0-9]*)
-      OUTPUT+="[WARN] .story-deployed 缺少数字 agents_version。重新运行 /story-setup。\n\n"
+      OUTPUT+="[WARN] .story-deployed に数字の agents_version がありません。再実行 /story-setup。\n\n"
       HAS_CONTENT=true
       ;;
     *)
       if [ "$AGENTS_VERSION" -lt 13 ]; then
-        OUTPUT+="[WARN] story-setup agents_version=$AGENTS_VERSION 低于 v13。重新运行 /story-setup 刷新 hooks、agents 和 references（部署后需新开会话）。\n\n"
+        OUTPUT+="[WARN] story-setup agents_version=$AGENTS_VERSION が v13 未満です。再実行 /story-setup で hooks、agents、references を更新してください（デプロイ後は新セッションが必要）。\n\n"
         HAS_CONTENT=true
       fi
       ;;
@@ -64,7 +64,7 @@ if sentinel_exists "$ROOT/.story-deployed"; then
 
   for field in setup_skill_version target_cli resolver_strategy references_dir; do
     if [ -z "$(read_sentinel_field "$field" "$ROOT/.story-deployed")" ]; then
-      OUTPUT+="[WARN] .story-deployed 缺少 $field 字段。重新运行 /story-setup 刷新部署元信息。\n\n"
+      OUTPUT+="[WARN] .story-deployed に $field フィールドがありません。再実行 /story-setup でデプロイメタ情報を更新してください。\n\n"
       HAS_CONTENT=true
     fi
   done
@@ -73,16 +73,16 @@ if sentinel_exists "$ROOT/.story-deployed"; then
   if [ -n "$REFERENCES_DIR" ]; then
     REFERENCES_PATH=$(resolve_project_path "$REFERENCES_DIR")
     if [ ! -d "$REFERENCES_PATH" ] || ! find "$REFERENCES_PATH" -maxdepth 1 -type f -name "*.md" -print -quit 2>/dev/null | grep -q .; then
-      OUTPUT+="[WARN] story-setup 参考资料包缺失或为空：${REFERENCES_DIR}。重新运行 /story-setup。\n\n"
+      OUTPUT+="[WARN] story-setup の参照資料パッケージが不足しているか空です：${REFERENCES_DIR}。再実行 /story-setup。\n\n"
       HAS_CONTENT=true
     fi
   fi
 else
-  OUTPUT+="[WARN] 写作环境未部署。运行 /story-setup 初始化。\n\n"
+  OUTPUT+="[WARN] 執筆環境がデプロイされていません。実行 /story-setup で初期化してください。\n\n"
   HAS_CONTENT=true
 fi
 
-# 显示分支和最近 commit（仅在有 git 历史时）
+# ブランチと最近のコミットを表示（git 履歴がある場合のみ）
 BRANCH=$(git -C "$ROOT" branch --show-current 2>/dev/null || echo "")
 if [ -n "$BRANCH" ]; then
   OUTPUT+="=== 写作进度 ===\n"
@@ -95,7 +95,7 @@ if [ -n "$BRANCH" ]; then
   HAS_CONTENT=true
 fi
 
-# 上下文.md 摘要（只看当前位置部分，前 10 行）
+# 上下文.md の要約（現在位置のみ、先頭10行）
 BOOK_DIR=$(discover_active_book)
 if [ -n "$BOOK_DIR" ] && [ -f "$BOOK_DIR/追踪/上下文.md" ]; then
   OUTPUT+="--- 当前位置 ---\n"
@@ -104,16 +104,16 @@ if [ -n "$BOOK_DIR" ] && [ -f "$BOOK_DIR/追踪/上下文.md" ]; then
   HAS_CONTENT=true
 fi
 
-# 未完成拆文（阈值 > 0 才报告）
+# 未完了の分析（閾値 > 0 の場合のみ報告）
 if [ -d "$ROOT/拆文库" ]; then
   PROGRESS_COUNT=$(find "$ROOT/拆文库" -name "_progress.md" 2>/dev/null | wc -l | tr -d ' ')
   if [ "$PROGRESS_COUNT" -gt 0 ]; then
-    OUTPUT+="[INFO] 拆文库/ 中有 $PROGRESS_COUNT 个未完成拆文。运行 /story-long-analyze 或 /story-short-analyze。\n"
+    OUTPUT+="[INFO] 拆文库/ に $PROGRESS_COUNT 件の未完了分析があります。実行 /story-long-analyze または /story-short-analyze。\n"
     HAS_CONTENT=true
   fi
 fi
 
-# 仅在有实际内容时输出，否则完全静默
+# 実際の内容がある場合のみ出力。それ以外は完全に沈黙
 if [ "$HAS_CONTENT" = true ]; then
   printf '%b' "$OUTPUT"
 fi

@@ -1,23 +1,24 @@
 #!/bin/bash
-# guard-outline-before-prose.sh — PreToolUse(Write|Edit|MultiEdit) 流程守卫
-# 写「正文」前必须先有对应大纲/细纲，否则阻止（exit 2，BLOCKING）。
+# guard-outline-before-prose.sh — PreToolUse(Write|Edit|MultiEdit) フローガード
+# 「正文」を書く前に対応するプロット/詳細プロットが必要。なければ阻止（exit 2、BLOCKING）。
 #
-# 只拦截「首次创建正文文件且缺细纲」这一种情况：
-#   - 长篇 正文/第N章_*.md ：要求同书 大纲/细纲_第N章.md 存在
-#   - 短篇 正文.md         ：要求同目录 小节大纲.md 存在
-# 正文已存在（续写/去AI味/改稿）一律放行；非正文目标、解析不到路径一律静默放行。
-# 设计原则：宁可漏拦不可误伤——任何不确定都 exit 0。
+# 以下の場合のみブロック：「初めて本文ファイルを作成し、詳細プロットがない」
+#   - 長編 正文/第N章_*.md ：同書の 大纲/細綱_第N章.md の存在が必要
+#   - 短編 正文.md         ：同ディレクトリの 小节大纲.md の存在が必要
+# 本文が既に存在する場合（続き/去AI味/改稿）はすべて通過。非本文ターゲット、パスが解析できない場合は静かに通過。
+# 設計原則：誤検出より見逃しを優先——不確実な場合はすべて exit 0。
 set -euo pipefail
 
 source "$(dirname "$0")/lib/common.sh"
 
-# 全程走字节稳定区域：本 hook 在中文路径上做 bash 通配（中间目录是中文书名时
-# 细纲_第*章*.md 在 GBK 区域会 NOMATCH）、sed 提章号、case 匹配，还内嵌 python 抽取
-# 中文路径。Windows 中文系统若导出 GBK/GB2312 区域设置，这些都会按多字节错误解码 UTF-8
-# 而失效。强制 C 区域走字节匹配（UTF-8 字面量 vs UTF-8 字节相等）才稳定（issue #164）。
-# 必须在内嵌 python 之前 export：LC_ALL=C 下 python 在 Windows 走 Unicode 环境 API、在
-# 新版 python 会把 C 强转 UTF-8，都能正确解码中文输入；反而是用户的 GBK 区域会把 python
-# 读到的 UTF-8 环境变量解成乱码。输出已用 sys.stdout.buffer 直写 UTF-8 字节、与区域无关。
+# 全行程バイト安定領域：本hookは中国語パスでbashワイルドカードを使用（中間ディレクトリが中国語書名の場合
+# 細綱_第*章*.md はGBKロケールでNOMATCH）、sedで章番号抽出、caseマッチング、pythonを内蔵して
+# 中国語パスを抽出する。Windows中国語システムでGBK/GB2312ロケールがエクスポートされている場合、
+# これらはすべてマルチバイトとしてUTF-8を誤ってデコードし、機能しなくなる。強制Cロケールでバイト一致
+# （UTF-8リテラル vs UTF-8バイトが等しい）なら安定（issue #164）。
+# 内蔵pythonの前にexportする必要あり：LC_ALL=C下のpythonはWindowsでUnicode環境APIを使用し、
+# 新しいpythonはCを強制的にUTF-8に変換するため、中国語入力を正しくデコードできる。むしろユーザーのGBKロケールが
+# pythonが読んだUTF-8環境変数を文字化けさせる。出力はsys.stdout.bufferでUTF-8バイトを直接書き込み、ロケールに依存しない。
 export LC_ALL=C
 
 HOOK_INPUT="${CLAUDE_TOOL_INPUT:-}"
@@ -26,12 +27,12 @@ if [ -z "$HOOK_INPUT" ] && [ ! -t 0 ]; then
 fi
 export HOOK_INPUT
 
-# 从 tool 输入 JSON 提取目标文件路径。探测真正可用的解释器：Windows 上
-# `command -v python3` 会命中 Microsoft Store 占位程序（exit 49），所以实跑
-# 一次 -c "" 而非只查 PATH。
-# 输出走 sys.stdout.buffer 直写 UTF-8 字节：Windows 中文系统 python stdout 默认
-# cp936，文本模式输出会把中文路径编成 GBK，和脚本里的 UTF-8 字面量（"正文"、第N章）
-# 字节不一致，导致每个比较恒假、守卫静默放行（issue #164）。
+# tool入力JSONからターゲットファイルパスを抽出。実際に使用可能なインタプリタを検出：Windows上で
+# `command -v python3` はMicrosoft Storeスタブ（exit 49）にヒットするため、PATHを確認するだけでなく
+# 実際に -c "" を実行する。
+# 出力はsys.stdout.bufferでUTF-8バイトを直接書き込み：Windows中国語システムのpython stdoutはデフォルトで
+# cp936、テキストモード出力は中国語パスをGBKにエンコードし、スクリプト内のUTF-8リテラル（"正文"、第N章）と
+# バイトが一致せず、すべての比較が恒偽になり、ガードが静かに通過する（issue #164）。
 extract_target_path() {
   local PYBIN=""
   for c in python3 python py; do
@@ -69,7 +70,7 @@ PY
 }
 
 TARGET="$(extract_target_path 2>/dev/null || true)"
-# 解析不到路径 → 放行
+# パスが解析できない → 通過
 [ -z "$TARGET" ] && exit 0
 
 ROOT=$(project_root)
@@ -83,40 +84,40 @@ PARENT="$(basename "$(dirname "$ABS")")"
 
 case "$BASE" in
   正文.md)
-    # 短篇单文件正文：已存在则放行（续写/改稿）
+    # 短編単一ファイル本文：既存なら通過（続き/改稿）
     [ -f "$ABS" ] && exit 0
     BOOK_DIR="$(dirname "$ABS")"
-    # story-import 迁移：已有 拆文库/{书名}/ 分析源时，正文先于小节大纲迁移是正常流程（小节大纲由拆文反推），放行
+    # story-import 移行：既に 拆文库/{書名}/ 分析ソースがある場合、本文が小节大纲より先に移行するのは正常フロー（小节大纲は分析から逆算）なので通過
     [ -d "$ROOT/拆文库/$(basename "$BOOK_DIR")" ] && exit 0
-    # 仅在确为短篇工程时拦截（有 设定.md 信号——story-short-write/import 都先产 设定.md），
-    # 避免误伤 docs/正文.md 等非作品文件
+    # 確実に短編プロジェクトの場合のみブロック（设定.md 信号あり——story-short-write/import は先に 设定.md を生成）、
+    # docs/正文.md などの非作品ファイルを誤ってブロックしない
     [ -f "$BOOK_DIR/设定.md" ] || exit 0
     if [ ! -f "$BOOK_DIR/小节大纲.md" ]; then
-      printf '%s\n' "⛔ 写正文被拦截：${TARGET} 缺少同目录 小节大纲.md。" >&2
-      printf '%s\n' "   先按 story-short-write 完成「小节大纲.md」，再写正文（不允许跳过大纲直接写正文）。" >&2
-      printf '%s\n' "   如确需先起草，请先补建 小节大纲.md。" >&2
+      printf '%s\n' "⛔ 本文書き込みがブロックされました：${TARGET} に同ディレクトリの 小节大纲.md がありません。" >&2
+      printf '%s\n' "   story-short-write に従って「小节大纲.md」を先に作成し、その後本文を書いてください（プロットなしで本文を書くことは許可されていません）。" >&2
+      printf '%s\n' "   どうしても先に下書きが必要な場合は、小节大纲.md を先に作成してください。" >&2
       exit 2
     fi
     ;;
   *)
-    # 长篇分章正文：父目录须为「正文」，文件名形如 第N章...
+    # 長編分割本文：親ディレクトリは「正文」、ファイル名は 第N章... の形式
     [ "$PARENT" = "正文" ] || exit 0
     case "$BASE" in
       第*章*.md) ;;
       *) exit 0 ;;
     esac
-    # 已存在则放行（续写/改稿）
+    # 既存なら通過（続き/改稿）
     [ -f "$ABS" ] && exit 0
-    # 章号（去前导零）
+    # 章番号（先頭ゼロ除去）
     NUM="$(printf '%s' "$BASE" | sed -n 's/^第0*\([0-9][0-9]*\)章.*/\1/p')"
     [ -z "$NUM" ] && exit 0
     BOOK_DIR="$(dirname "$(dirname "$ABS")")"
-    # story-import 迁移：已有 拆文库/{书名}/ 分析源时放行（细纲由章节摘要反推、晚于正文迁移）
+    # story-import 移行：既に 拆文库/{書名}/ 分析ソースがある場合は通過（細綱は章要約から逆算され、本文より後に移行）
     [ -d "$ROOT/拆文库/$(basename "$BOOK_DIR")" ] && exit 0
     OUTLINE_DIR="$BOOK_DIR/大纲"
     FOUND=""
     if [ -d "$OUTLINE_DIR" ]; then
-      # 容忍补零差异与标题后缀：按整数章号匹配 大纲/细纲_第*章*.md
+      # ゼロ埋めの差異とタイトル接尾辞を許容：整数章番号で 大纲/細綱_第*章*.md を一致
       for f in "$OUTLINE_DIR"/细纲_第*章*.md; do
         [ -e "$f" ] || continue
         fnum="$(basename "$f" | sed -n 's/^细纲_第0*\([0-9][0-9]*\)章.*/\1/p')"
@@ -124,9 +125,9 @@ case "$BASE" in
       done
     fi
     if [ -z "$FOUND" ]; then
-      printf '%s\n' "⛔ 写正文被拦截：第 ${NUM} 章缺少细纲（${OUTLINE_DIR#$ROOT/}/细纲_第${NUM}章.md）。" >&2
-      printf '%s\n' "   按 story-long-write 单章流程先补建细纲，再写正文（不允许跳过细纲直接写作）。" >&2
-      printf '%s\n' "   如确需先起草，请先补建对应细纲文件。" >&2
+      printf '%s\n' "⛔ 本文書き込みがブロックされました：第 ${NUM} 章に細綱がありません（${OUTLINE_DIR#$ROOT/}/細綱_第${NUM}章.md）。" >&2
+      printf '%s\n' "   story-long-write の単章フローに従って細綱を先に作成し、その後本文を書いてください（細綱なしで直接書くことは許可されていません）。" >&2
+      printf '%s\n' "   どうしても先に下書きが必要な場合は、対応する細綱ファイルを先に作成してください。" >&2
       exit 2
     fi
     ;;

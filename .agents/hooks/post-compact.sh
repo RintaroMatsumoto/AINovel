@@ -1,11 +1,11 @@
 #!/bin/bash
-# post-compact.sh — compact 后提醒恢复上下文
+# post-compact.sh — compact 後にコンテキスト復元を促す
 set -euo pipefail
 
-# 加载公共函数库
+# 共通関数ライブラリを読み込み
 source "$(dirname "$0")/lib/common.sh"
 
-# 字节稳定区域：经 discover_active_book 处理中文书名/路径，GBK 区域下才不会乱（issue #164 同类）。
+# バイト安定領域：discover_active_book で中国語書名/パスを処理。GBK ロケール下でも乱れない（issue #164 同類）。
 export LC_ALL=C
 
 ROOT=$(project_root)
