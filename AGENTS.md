@@ -53,7 +53,7 @@ AIと協力して小説を書くための統合パイプライン。
 ## スキル使用ルール
 - **セッション開始時**: 必ず上記Protocolに従いスキルをロードする
 - **ワークフロー優先**: スキル内のPhase定義・手順・Referenceファイルを順に読み、飛ばさない
-- **中国語→日本語変換**: `.agents/skills/` 配下のSKILL.mdは中国語で書かれているが、story-long-writeの細綱テンプレートは日本語化済。他スキルのテンプレートをファイル出力する際は日本語に変換すること。Referenceファイルは読み物のため翻訳不要
+- **中国語→日本語変換**: `.agents/skills/` 配下のSKILL.mdは中国語で書かれているが、story-long-writeの計画テンプレートは日本語化済。他スキルのテンプレートをファイル出力する際は日本語に変換すること。Referenceファイルは読み物のため翻訳不要
 - **調査時**: スキルの `story-researcher` の方法論を参考に `task` と `webfetch` を並列利用する
 - **執筆時**: `story-long-write` のPhase 4（内容確認 → 執筆 → 字数検証 → 品質チェック）の順を守る
 - **スキル間連携**: story-long-write の各Phase内で別スキル（story-deslop等）へのリンクがあれば従う
@@ -64,20 +64,20 @@ AIと協力して小説を書くための統合パイプライン。
 
 ### 書く前（写前准备）
 1. **状態選別**: `追踪/角色状态.md` から本章に関わるキャラの現在状態を抜粋。章冒頭で参照。
-2. **モジュール召回**: `対標/{主対標書}/` の情緒モジュール＋文風を参照。目標情緒に見合った技法を選ぶ。
+2. **モジュール召回**: `参照/{主参照書}/` の情緒モジュール＋文体分析を参照。目標情緒に見合った技法を選ぶ。
 3. **指令確認**: 本章の感情目標を一文で宣言。「この章は X を感じさせるために存在する」。
 
 ### 書いた後（品質チェック）
-4. **字数検証**: `py` で文字数カウント。細綱目標の90%未満なら補完。
+4. **字数検証**: `py` で文字数カウント。計画目標の90%未満なら補完。
 5. **鉤子・爽点チェック**: 章末に引きがあるか。爽点があれば前に危機/期待が敷かれているか。
-6. **元情報スキャン**: 本文に `第X章` `細綱` `伏筆` `読者` 等の工程語が混入していないか（タイトル行除く）。
+6. **元情報スキャン**: 本文に `第X章` `計画` `伏筆` `読者` 等の工程語が混入していないか（タイトル行除く）。
 7. **標点正規化**: `node .agents/skills/story-long-write/scripts/normalize-punctuation.js {本文ファイル}` を実行。
 8. **禁用詞スキャン**: `.agents/skills/story-long-write/references/banned-words.md` の一級/二級語をチェック。ヒットしたら置換。
 9. **追跡更新**: `追踪/伏筆.md`（埋設/回収）、`追踪/角色状态.md`（状態変化）、`追踪/上下文.md`（進捗）を更新。
 10. **中間スナップショット**: 3章ごとに `ls 本文/` で直近3章のファイルサイズ確認（>100 bytes）。
 
 ### 既存インフラ
-- 対標書: `{各巻}/対標/DeepLove/`（拆文報告＋文風）
+- 参照書: `{各巻}/参照/DeepLove/`（分析レポート＋文体分析）
 - 禁用詞: `.agents/skills/story-long-write/references/banned-words.md`
 - 標点正規化: `.agents/skills/story-long-write/scripts/normalize-punctuation.js`
 - 字数カウント: py で実行（python3→python→py の順に探査、Windowsではpyが安定）
@@ -104,7 +104,7 @@ AIと協力して小説を書くための統合パイプライン。
 ## ディレクトリ構造
 ```
 novels/
-├── 大綱.md（三部作＋特別編 全体）
+├── 構成.md（三部作＋特別編 全体）
 ├── 設定/（キャラ・世界観・関係・題材定位）※全集共通
 ├── 参考/（調査・販売戦略）※全集共通
 ├── 追跡/（伏線・時間線）※全集共通
@@ -161,7 +161,7 @@ Gitで各バージョンを管理: `git add . && git commit -m "第X巻 完了"`
 ## 使用可能なAgent（.agents/agents/）
 | Agent | モデル | 役割 |
 |-------|--------|------|
-| story-architect | Opus | 故事架构·题材定位·大纲·反转设计 |
+| story-architect | Opus | 故事架构·题材定位·構成·反转设计 |
 | character-designer | Sonnet | 角色设计·档案·语言风格·动机链 |
 | narrative-writer | Sonnet | 正文写作·去AI味·格式合规 |
 | consistency-checker | Haiku | 事实冲突扫描·伏笔追踪·整合性报告 |
@@ -173,12 +173,12 @@ Gitで各バージョンを管理: `git add . && git commit -m "第X巻 完了"`
 - `story-consistency.md` — 設定・伏線・時間線の整合性
 - `story-format.md` — 文体・書式の統一
 - `story-narrative.md` — 一人称・会話駆動の遵守
-- `story-outline.md` — 大綱・細綱の構造ルール
+- `story-outline.md` — 構成・計画の構造ルール
 
 ## フック（.agents/hooks/）
 - `session-start.sh` — セッション開始時の分岐・進捗表示
 - `session-end.sh` — セッション終了時のログ記録
 - `detect-story-gaps.sh` — 設定欠落・伏線断線の検出
-- `guard-outline-before-prose.sh` — 細綱なしの本文執筆を防止
+- `guard-outline-before-prose.sh` — 計画なしの本文執筆を防止
 - `validate-story-commit.sh` — コミット前の属性チェック
 - `pre-compact.sh` / `post-compact.sh` — コンパクション前後の文脈保存
