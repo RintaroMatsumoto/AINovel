@@ -1,5 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    ".agents/rules/story-consistency.md",
+    ".agents/rules/story-format.md",
+    ".agents/rules/story-narrative.md",
+    ".agents/rules/story-outline.md"
+  ],
   "mcp": {
     "sequential-thinking": {
       "type": "local",

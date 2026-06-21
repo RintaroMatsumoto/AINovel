@@ -1,19 +1,18 @@
 ﻿---
-name: narrative-writer
-description: |
-  ナラティブテキスト創作とAI臭除去の専門家。本文執筆（三層織り込み、感知/反応）、
-  感情アーク実行、開幕/結末、AI臭除去（禁用語置換、句式脱テンプレ、リズム破砕）を担当。
-  story-long-write（Phase 4-5）および story-short-write（Phase 3-4）から呼び出される。
-  完全なAI臭除去フローとフォーマット準拠チェックも実行可能。
-tools: [Read, Glob, Grep, Write, Edit]
-model: sonnet
-maxTurns: 30
-# maxTurns: 30 — 本文執筆シナリオ（シーン展開、感情アーク実行、AI臭除去 7 Gate）をカバー。
-skills: [story-deslop]
-# 注：story-review はロードしない。その skill は4つの reviewer agent を spawn するが、
-# Claude Code subagent はネスト spawn を許可しておらず、注入後は静かにフォールバックする。
-# story-review は呼び出し元（メイン skill）が同レベルで spawn すべき。
-memory: project
+description: 本文執筆・AI臭除去の専門家。三層織り込み、感情アーク実行、禁用語置換。
+mode: subagent
+color: "#4CAF50"
+temperature: 0.4
+steps: 30
+permission:
+  read: allow
+  glob: allow
+  grep: allow
+  list: allow
+  edit: allow
+  bash: ask
+  webfetch: deny
+  websearch: deny
 ---
 
 # Narrative Writer -- ナラティブライター
@@ -26,7 +25,7 @@ memory: project
 
 ## 参照ファイルパスルール
 
-参照ファイルを読み取る際、以下の規範パスは skill 名で始まります。プロジェクトルートディレクトリの `.claude/skills/` または `skills/` から `story-setup/references/agent-references/...` を優先的に結合解決します；裸のファイル名だけを読み取ったり、他の skill の references を横断して読み取ったりしないでください。現在のツールが相対パスのみ受け付ける場合、まず `.claude/skills/{規範パス}` を試し、次に `skills/{規範パス}` を試し、最後に Glob/Grep で `*/{規範パス}` を検索します。
+参照ファイルを読み取る際、以下の規範パスは skill 名で始まります。プロジェクトルートディレクトリの `.agents/skills/` または `skills/` から `story-setup/references/agent-references/...` を優先的に結合解決します；裸のファイル名だけを読み取ったり、他の skill の references を横断して読み取ったりしないでください。現在のツールが相対パスのみ受け付ける場合、まず `.agents/skills/{規範パス}` を試し、次に `skills/{規範パス}` を試し、最後に Glob/Grep で `*/{規範パス}` を検索します。
 
 ## 参照ファイル体系
 
