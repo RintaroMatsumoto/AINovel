@@ -140,7 +140,8 @@ AIと協力して小説を書くための統合パイプライン。
 詳細は `.agents/references/dreampowers-導入記録.md` を参照。
 
 ### 既存インフラ
-- 参照書: `{各巻}/参照/DeepLove/`（分析レポート＋文体分析）
+- **主参照**: DeepLove（文体・ターゲット・販売戦略のベース）`{各巻}/参照/DeepLove/` `novels/参考/DeepLove戦略研究.md`
+- **構造参考**: 1Q84（POV交差・情報非対称・伏線設計のみ。文体は参考にしない）`novels/参考/調査_1Q84構造分析.md` `novels/参考/調査_1Q84_POV分析.md`
 - 禁用詞: `.agents/skills/story-long-write/references/banned-words.md`
 - 標点正規化: `.agents/skills/story-long-write/scripts/normalize-punctuation.js`
 - 字数カウント: py で実行（python3→python→py の順に探査、Windowsではpyが安定）
