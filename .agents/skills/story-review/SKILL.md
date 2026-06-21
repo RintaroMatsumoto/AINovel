@@ -1,4 +1,4 @@
----
+﻿---
 name: story-review
 version: 1.1.0
 description: |
@@ -31,8 +31,8 @@ metadata:
 1. **确定请求模式**：解析用户输入中的 `full`、`lean`、`solo`；未指定时目标模式为 `full`。
 2. **确认是否允许 spawn**：如果当前已经在子代理/Agent 内执行，不再递归 spawn，直接降级为 `solo`。
 3. **检查核心 Agent 部署状态**（只检查项目内 agents，不要假设一定存在）：
-   - full 必需：`.claude/agents/story-architect.md`、`.claude/agents/character-designer.md`、`.claude/agents/narrative-writer.md`、`.claude/agents/consistency-checker.md`
-   - lean 必需：`.claude/agents/story-architect.md`、`.claude/agents/consistency-checker.md`
+   - full 必需：`.opencode/agents/story-architect.md`、`.opencode/agents/character-designer.md`、`.opencode/agents/narrative-writer.md`、`.opencode/agents/consistency-checker.md`
+   - lean 必需：`.opencode/agents/story-architect.md`、`.opencode/agents/consistency-checker.md`
    - 对每个必需 Agent 文件，读取 frontmatter，确认 `name:` 与 subagent_type 完全一致；frontmatter 缺失、不可解析或 name 不匹配时视为 malformed agent。
    - 如果 `.story-deployed` 存在且 `agents_version` 缺失或小于 `13`，视为 stale deployment；不要 spawn，降级 `solo`，建议用户重新运行 `/story-setup`。
    - 如果目标模式所需任一文件缺失或 malformed，**不要尝试 spawn 缺失/异常 Agent**；自动降级为 `solo`，并在报告开头写明：`Fallback: missing agents -> solo` 或 `Fallback: malformed agents -> solo`，列出问题文件，建议用户运行 `/story-setup`。
@@ -146,7 +146,7 @@ full/lean 模式下，主会话必须把“审查基准包摘要”直接写进�
    - 默认 `--quote-mode keep`，不把知乎盐言短篇的 `「」` 当作问题；只有项目明确指定引号风格时才检查对应转换建议。
    - 该脚本是 `story-review` 的本地副本，不引用其他 skill 的文件。
 
-**Phase 1.5：可选 story-explorer 预查询**。仅当 `Effective Mode` 仍为 `full`/`lean`、当前允许 spawn 且 Agent/Task 工具可用时，才可检查 `.claude/agents/story-explorer.md` 并 spawn `story-explorer` 预查设定摘要；`solo` 或子代理递归保护场景下不得 spawn，只能直接 Read/Grep。Prompt 示例：
+**Phase 1.5：可选 story-explorer 预查询**。仅当 `Effective Mode` 仍为 `full`/`lean`、当前允许 spawn 且 Agent/Task 工具可用时，才可检查 `.opencode/agents/story-explorer.md` 并 spawn `story-explorer` 预查设定摘要；`solo` 或子代理递归保护场景下不得 spawn，只能直接 Read/Grep。Prompt 示例：
 
 ```text
 项目目录：{dir}
@@ -306,7 +306,7 @@ full/lean 模式下，主会话必须把“审查基准包摘要”直接写进�
 
 1. 收集实际执行的 reviewer VERDICT 和 FINDINGS。
 2. 合并去重：按 `severity` 排序（S1 > S2 > S3 > S4），同级内按影响范围排序。
-3. **可选事实核查**：如果审查内容涉及需要验证的外部事实（历史年代、地理方位、职业细节等），只有在 `Effective Mode` 仍为 `full`/`lean`、当前不是子 Agent、Agent/Task 工具可用且 `.claude/agents/story-researcher.md` 已部署时，才可额外 spawn `story-researcher` 搜索验证；`solo`、missing/malformed/stale/spawn failed 降级或子代理递归保护场景下不得 spawn，只能在报告中标记“需人工事实核查”。
+3. **可选事实核查**：如果审查内容涉及需要验证的外部事实（历史年代、地理方位、职业细节等），只有在 `Effective Mode` 仍为 `full`/`lean`、当前不是子 Agent、Agent/Task 工具可用且 `.opencode/agents/story-researcher.md` 已部署时，才可额外 spawn `story-researcher` 搜索验证；`solo`、missing/malformed/stale/spawn failed 降级或子代理递归保护场景下不得 spawn，只能在报告中标记“需人工事实核查”。
 4. **分歧呈现**：如果 reviewer 间有冲突意见，明确呈现分歧让用户裁决；不要自动妥协。
 5. 输出综合审查报告。报告必须列出实际模式、fallback 原因、使用的 rubric、Rubric Source、审查范围和证据不足项。
 

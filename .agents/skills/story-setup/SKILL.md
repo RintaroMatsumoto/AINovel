@@ -1,4 +1,4 @@
----
+﻿---
 name: story-setup
 version: 1.2.2
 description: |
@@ -42,7 +42,7 @@ metadata:
 | `skills/story-setup/references/templates/CLAUDE.md.tmpl` | `CLAUDE.md` | user+managed | marker/section merge | contains story skill routing sections |
 | `skills/story-setup/references/templates/hooks/` | `.claude/hooks/` | story-setup managed | recursive replace | `session-*.sh`, `detect-story-gaps.sh`, `validate-story-commit.sh`, `guard-outline-before-prose.sh`, `lib/common.sh`, `lib/sentinel.sh` exist |
 | `skills/story-setup/references/templates/rules/*.md` | `.claude/rules/*.md` | story-setup managed | replace | every rule contains `paths` frontmatter |
-| `skills/story-setup/references/templates/agents/*.md` | `.claude/agents/*.md` | story-setup managed | replace | 7 agent files exist |
+| `skills/story-setup/references/templates/agents/*.md` | `.opencode/agents/*.md` | story-setup managed | replace | 7 agent files exist |
 | `skills/story-setup/references/agent-references/*.md` | `.claude/skills/story-setup/references/agent-references/*.md` | story-setup managed | replace | every `story-setup/references/agent-references/*.md` reference resolves |
 | `skills/story-setup/references/templates/settings-hooks.json` | `.claude/settings.local.json` | user+managed | merge by hook command | hook JSON valid and registered commands deduped |
 | `skills/story-setup/references/templates/上下文.md.tmpl` | `{书名}/追踪/上下文.md` | user state | create only if absent | never overwrite existing writing context |
@@ -70,9 +70,9 @@ metadata:
 ### 2.4 部署 Agents
 
 - 读取 `skills/story-setup/references/templates/agents/` 下所有 `.md` 文件
-- 复制到用户项目的 `.claude/agents/` 目录
+- 复制到用户项目的 `.opencode/agents/` 目录
 - Agent 文件属于 story-setup 管理文件，可安全覆盖；版本升级时按 `UPGRADING.md` 的版本检测结果重新部署
-- **部署后必须新开会话**：Claude Code 只在会话启动时扫描 `.claude/agents/` 注册 subagent。当前会话内新部署的 agent 不会立即可用——必须让用户新开一个 Claude Code 会话，`story-architect`/`narrative-writer` 等 custom agent 才会注册成 `subagent_type`；否则 story-review、story-long-write 等想 spawn 时会拿到「subagent_type 不可用」并降级 solo（单视角）。这一步必须在安装报告里明确告知用户（见 Phase 3 第 6 步）。
+- **部署后必须新开会话**：Claude Code 只在会话启动时扫描 `.opencode/agents/` 注册 subagent。当前会话内新部署的 agent 不会立即可用——必须让用户新开一个 Claude Code 会话，`story-architect`/`narrative-writer` 等 custom agent 才会注册成 `subagent_type`；否则 story-review、story-long-write 等想 spawn 时会拿到「subagent_type 不可用」并降级 solo（单视角）。这一步必须在安装报告里明确告知用户（见 Phase 3 第 6 步）。
 
 ### 2.4.1 Agent 兼容性处理
 
@@ -125,7 +125,7 @@ metadata:
 2. 验证 rules 路径：
    - 检查 `.claude/rules/` 下的规则文件是否存在且包含 `paths` frontmatter
 3. 验证 agents：
-   - 检查 `.claude/agents/` 下的 7 个 agent 定义文件是否存在
+   - 检查 `.opencode/agents/` 下的 7 个 agent 定义文件是否存在
 4. 验证 agent reference bundle：
    - 检查 `.claude/skills/story-setup/references/agent-references/` 下 reference 文件完整
    - 检查所有 `story-setup/references/agent-references/<file>.md` 都能解析到 deployed bundle
@@ -134,7 +134,7 @@ metadata:
 6. 输出安装报告：
    - 列出所有已部署的文件
    - 列出需要注意的事项（如已有配置已合并）
-   - **⚠️ 重启提示（必须醒目输出）**：本次部署写入了 `.claude/agents/`，但这些 custom agent 只在「会话启动」时才会被 Claude Code 注册成 `subagent_type`。**请新开一个 Claude Code 会话再开始写作**，否则当前会话里 story-review / story-long-write 等想 spawn `story-architect`、`narrative-writer` 等时会拿到「subagent_type 不可用」并降级 solo（单视角，失去多 agent 协作）。判断是否生效：新会话里跑 `/story-review`，报告头若是 `Effective Mode: full/lean` 即注册成功；若是 `Fallback: ... -> solo` 说明还在旧会话或未注册。
+   - **⚠️ 重启提示（必须醒目输出）**：本次部署写入了 `.opencode/agents/`，但这些 custom agent 只在「会话启动」时才会被 Claude Code 注册成 `subagent_type`。**请新开一个 Claude Code 会话再开始写作**，否则当前会话里 story-review / story-long-write 等想 spawn `story-architect`、`narrative-writer` 等时会拿到「subagent_type 不可用」并降级 solo（单视角，失去多 agent 协作）。判断是否生效：新会话里跑 `/story-review`，报告头若是 `Effective Mode: full/lean` 即注册成功；若是 `Fallback: ... -> solo` 说明还在旧会话或未注册。
    - 重启后即可使用 `/story-long-write` 或 `/story-short-write`
 
 ---

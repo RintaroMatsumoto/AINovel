@@ -1,4 +1,4 @@
----
+﻿---
 name: story
 description: |
   网络小说工具箱主入口。根据用户需求自动路由到对应 skill。
@@ -40,7 +40,7 @@ description: |
 
 ## 查询降级
 
-「查故事资料」「查资料」走 agent 前先做轻量可用性检查（路由只做这一层，不承担全局部署策略）：当前不在子代理上下文、Agent/Task 工具可用、且 `.claude/agents/{story-explorer|story-researcher}.md` 存在 → 正常 spawn。任一不满足则降级，不硬失败：
+「查故事资料」「查资料」走 agent 前先做轻量可用性检查（路由只做这一层，不承担全局部署策略）：当前不在子代理上下文、Agent/Task 工具可用、且 `.opencode/agents/{story-explorer|story-researcher}.md` 存在 → 正常 spawn。任一不满足则降级，不硬失败：
 
 - `story-explorer` 不可用 → 主线程直接用 Read/Grep 从项目文件检索（角色状态/伏笔/进度/设定），回答前标注 `Fallback: agent unavailable -> direct lookup`；项目尚未部署时提示先 `/story-setup`。
 - `story-researcher` 不可用 → 主线程用现有检索/回答能力完成，或提示用户改用 `/browser-cdp` 采集，同样标注 `Fallback: agent unavailable -> direct lookup`。
