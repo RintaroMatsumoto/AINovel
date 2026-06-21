@@ -72,6 +72,8 @@ AIと協力して小説を書くための統合パイプライン。
 
 ### Phase 2：核心設定の再構成（次回開始地点）
 以下を **character-designer + story-architect** と協力して実行:
+- **最初に `.agents/references/dreampowers-7dim-style.md` を読み込む**
+- 7次元アンケートで作品全体の文体ベースラインを定義
 - 既存の `設定/` ファイルをスキルテンプレートに変換
 - **各キャラの7次元言語スタイルを定義**（口調・語彙・リズム・距離感・情報の好み・立場・性格）
 - story-architect を spawn して題材定位・核心梗を確認
@@ -93,6 +95,8 @@ AIと協力して小説を書くための統合パイプライン。
 ### Phase 5：品質チェック
 - 禁用語スキャン（banned-words.md）
 - 標点正規化（normalize-punctuation.js）
+- 読者視点4次元評価（`dreampowers-reader-review.md`）を consistency-checker が実行
+- クレアモント係数（CC）計算。CC > 2 なら新規伏線設置を停止
 - story-review full で最終レビュー
 
 ## スキル使用ルール
@@ -121,6 +125,19 @@ AIと協力して小説を書くための統合パイプライン。
 9. **感情目標達成度チェック**: 書く前に宣言した感情目標に対し、0〜10で自己評価。6未満なら書き直す。結果を追跡ファイルに記録。
 10. **追跡更新**: `追踪/伏筆.md`（埋設/回収）、`追踪/登場人物の状態.md`（状態変化）、`追踪/上下文.md`（進捗）を更新。
 11. **中間スナップショット**: 3章ごとに `ls 本文/` で直近3章のファイルサイズ確認（>100 bytes）。
+
+### Dreampowers 導入資産
+以下のファイルは Dreampowers (skyfiredao) の設計思想を抽出・翻訳したもの。フルインストールはせず、必要な設計のみを日本語化して組み込んでいる。
+
+| ファイル | 出典 | 用途 |
+|---------|------|------|
+| `.agents/references/dreampowers-7dim-style.md` | dp-set-style | Phase 2 7次元文体定義アンケート |
+| `.agents/references/dreampowers-reader-review.md` | dp-review-reader | Phase 5 読者視点4次元評価 |
+| `.agents/rules/story-outline.md` Rule 9-10 | dp-set-outline | 6アイアンルール + 五問ゲート |
+| `.agents/rules/story-consistency.md` Rule 7 | dp-set-outline | クレアモント係数 |
+| `.agents/references/dreampowers-導入記録.md` | — | 導入経緯・利点欠点・将来拡張案 |
+
+詳細は `.agents/references/dreampowers-導入記録.md` を参照。
 
 ### 既存インフラ
 - 参照書: `{各巻}/参照/DeepLove/`（分析レポート＋文体分析）
