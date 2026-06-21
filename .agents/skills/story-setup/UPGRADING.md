@@ -1,4 +1,4 @@
-# 升级指南
+﻿# 升级指南
 
 ## 升级策略
 
@@ -74,7 +74,7 @@
 
 ### v5
 
-- 更新 narrative-writer 场景写法：使用”三维度揉进”并按画面分段控制段落密度
+- 更新 narrative-writer 场景写法：使用”三層織り込み”并按画面分段控制段落密度
 - 字数统计改为 Python 字符统计优先，`wc -m` 仅作 macOS/Linux 备选，提升 Windows + DeepSeek/Claude Code 兼容性
 - 已部署项目重新运行 `/story-setup` 后获取新版 agent 定义
 
