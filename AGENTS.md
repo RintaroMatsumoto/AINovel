@@ -55,58 +55,46 @@ AIと協力して小説を書くための統合パイプライン。
 3. 7次元言語スタイルの存在を確認: `設定/キャラクター/*.md` に各キャラの言語スタイル定義（口調・語彙・リズム・距離感）が全員分あるか。欠けている場合、Phase 2 で補完するまで執筆不可
 4. 現在のフェーズに応じて該当スキルを `skill()` でロードする:
    - 環境未整備 → `story-setup`
-   - 市場調査・企画段階 → `story-long-scan`
-   - 参考作品分析中 → `story-long-analyze`
    - プロット・設定構築中 → `story-long-write`（Phase 1-3）
-   - **全編スキル再構築（Phase 2 核心設定から開始）** → `story-long-write`
    - 本文執筆中 → `story-long-write`（Phase 4）
    - 品質確認・レビュー → `story-review`
    - AI臭除去 → `story-deslop`
    - 表紙生成 → `story-cover`
-   - ルーター起動のみ（まだ決まってない） → `story`
 5. ロードしたスキルのワークフローに沿ってタスクを進める。スキルが定義する各Phaseの手順を優先する
 6. `参考/` 配下の調査ファイルが存在する場合、執筆前に内容を参照する
 
 ## 全編スキル再構築 実行計画
 前セッションの診断により、プロット・構成・本文がスキル未使用で作成され「設計図なしの状態」と判明。
-設定（あんた監修）は流用し、それ以外は `/story-long-write` ワークフローに従い再構築する。
+設定（あんた監修）は流用し、`/story-long-write`（Golden Cross 専用カスタマイズ済）ワークフローに従い再構築する。
 
-### Phase 2：核心設定の再構成（次回開始地点）
+### Phase 1：前提確認
+- 文体方針・4人の声・4巻構成の確認
+
+### Phase 2：核心設定
 以下を **character-designer + story-architect** と協力して実行:
-- **最初に `.agents/references/dreampowers-7dim-style.md` を読み込む**
-- 7次元アンケートで作品全体の文体ベースラインを定義
-- 既存の `設定/` ファイルをスキルテンプレートに変換
-- **各キャラの7次元言語スタイルを定義**（口調・語彙・リズム・距離感・情報の好み・立場・性格）
-- story-architect を spawn して題材定位・核心梗を確認
-- 設定はあんた監修のため再定義不要。フォーマット変換と7次元の追加のみ。
+- 各キャラの7次元言語スタイルを定義（口調・語彙・リズム・距離感）
+- 破壊キャンペーンの設計
+- story-architect を spawn して題材定位・核心設定を確認
 
-### Phase 3：大綱構築
-- 各巻の巻構成（爽点リズム・感情弧・人物弧・キー反転・伏線配置）
-- 全51章の細綱（**新版章設計図**）を story-architect と協力して生成
-  - 各章に**複数線（主線・副線・イベント線・感情線・論理線）**を5線強制
-  - 各章に「感情目標」（この章で読者に何を感じさせるか）を明記
-- **ローリング方式**: 常に5章先まで計画を用意。3章書くごとに全体レビュー
+### Phase 3：章構成
+- FIRE の章立て（封筒8通＋回想の配置）
+- 各章の計画書を作成（封筒の進行・回想の有無・感情目標・誠の文体段階）
 
 ### Phase 4：本文執筆（narrative-writer 必須）
 - **俺（メインAI）は本文を直接書かない。必ず narrative-writer を spawn して書かせる**
-- 各章は: 細綱確認 → 写前準備（状態選別→モジュール召回→指令確認）→ narrative-writer spawn
-- 書いた後: 字数検証 → メタ情報スキャン → 禁用語 → 標点正規化 → **感情目標達成度を自己評価して記録** → 追跡更新
-- **3章ごとの中間スナップショット**: 字数確認 + 感情弧の連続チェック + 伏線進捗確認
+- 各章は: 計画確認 → 写前準備（状態選別→参照確認→感情目標宣言）→ narrative-writer spawn
+- 書いた後: 字数検証 → メタ情報スキャン → 禁用語チェック → 標点正規化 → 追跡更新
+- **3章ごとの中間スナップショット**: 字数確認 + 感情の連続性チェック
 
 ### Phase 5：品質チェック
 - 禁用語スキャン（banned-words.md）
 - 標点正規化（normalize-punctuation.js）
-- 読者視点4次元評価（`dreampowers-reader-review.md`）を consistency-checker が実行
-- クレアモント係数（CC）計算。CC > 2 なら新規伏線設置を停止
-- story-review full で最終レビュー
+- story-review で最終レビュー
 
 ## スキル使用ルール
 - **セッション開始時**: 必ず上記Protocolに従いスキルをロードする
 - **ワークフロー優先**: スキル内のPhase定義・手順・Referenceファイルを順に読み、飛ばさない
-- **中国語→日本語変換**: `.agents/skills/` 配下のSKILL.mdは中国語で書かれているが、story-long-writeの計画テンプレートは日本語化済。他スキルのテンプレートをファイル出力する際は日本語に変換すること。Referenceファイルは読み物のため翻訳不要
-- **調査時**: スキルの `story-researcher` の方法論を参考に `task` と `webfetch` を並列利用する
 - **執筆時**: `story-long-write` のPhase 4（内容確認 → 執筆 → 字数検証 → 品質チェック）の順を守る
-- **スキル間連携**: story-long-write の各Phase内で別スキル（story-deslop等）へのリンクがあれば従う
 
 ## Phase 4 執筆チェックリスト（必ず守る）
 
@@ -119,26 +107,13 @@ AIと協力して小説を書くための統合パイプライン。
 
 ### 書いた後（品質チェック）
 4. **字数検証**: `py` で文字数カウント。計画目標の90%未満なら補完。
-5. **鉤子・爽点チェック**: 章末に引きがあるか。爽点があれば前に危機/期待が敷かれているか。
+5. **章末チェック**: 章末に引きがあるか。
 6. **元情報スキャン**: 本文に `第X章` `計画` `伏線` `読者` 等の工程語が混入していないか（タイトル行除く）。
 7. **標点正規化**: `node .agents/skills/story-long-write/scripts/normalize-punctuation.js {本文ファイル}` を実行。
-8. **禁用詞スキャン**: `.agents/skills/story-long-write/references/banned-words.md` の一級/二級語をチェック。ヒットしたら置換。
+8. **禁用語スキャン**: `.agents/skills/story-long-write/references/banned-words.md` の一級/二級語をチェック。ヒットしたら置換。
 9. **感情目標達成度チェック**: 書く前に宣言した感情目標に対し、0〜10で自己評価。6未満なら書き直す。結果を追跡ファイルに記録。
 10. **追跡更新**: `追跡/伏線.md`（埋設/回収）、`追跡/キャラ状態.md`（状態変化）、`追跡/文脈.md`（進捗）を更新。
 11. **中間スナップショット**: 3章ごとに `ls 本文/` で直近3章のファイルサイズ確認（>100 bytes）。
-
-### Dreampowers 導入資産
-以下のファイルは Dreampowers (skyfiredao) の設計思想を抽出・翻訳したもの。フルインストールはせず、必要な設計のみを日本語化して組み込んでいる。
-
-| ファイル | 出典 | 用途 |
-|---------|------|------|
-| `.agents/references/dreampowers-7dim-style.md` | dp-set-style | Phase 2 7次元文体定義アンケート |
-| `.agents/references/dreampowers-reader-review.md` | dp-review-reader | Phase 5 読者視点4次元評価 |
-| `.agents/rules/story-outline.md` Rule 9-10 | dp-set-outline | 6アイアンルール + 五問ゲート |
-| `.agents/rules/story-consistency.md` Rule 7 | dp-set-outline | クレアモント係数 |
-| `.agents/references/dreampowers-導入記録.md` | — | 導入経緯・利点欠点・将来拡張案 |
-
-詳細は `.agents/references/dreampowers-導入記録.md` を参照。
 
 ### 既存インフラ
 - **主参照**: DeepLove（文体・ターゲット・販売戦略のベース）`{各巻}/参照/DeepLove/` `novels/参考/DeepLove戦略研究.md`
@@ -222,11 +197,9 @@ Part1（第一部）：百合子34・誠40・栞14・翼11
 
 ## 執筆フロー
 1. `/story-setup` で環境準備
-2. `/story-long-scan` で市場調査
-3. `/story-long-analyze` で参考作品分析
-4. `/story-long-write` で執筆（プロット→設定→本文）
-5. `/story-deslop` でAI臭除去
-6. `/story-review` でレビュー
+2. `/story-long-write` で執筆（設定→章構成→本文）
+3. `/story-deslop` でAI臭除去
+4. `/story-review` でレビュー
 
 **各PhaseのReferenceファイルを読め。ワークフローを飛ばすな。narrative-writer を使え。**
 Gitで各バージョンを管理: `git add . && git commit -m "第X巻 完了"`
