@@ -60,7 +60,7 @@ description: |
 
 1. **narrative-writer agent を spawn して本文を書かせる**
 2. 写前準備：本章に関わるキャラ状態・封筒の進行段階・回想の有無・誠の文体段階を確認
-3. 誠の一人称に徹する。内省を恐れず、自然な回想を溶け込ませる（参照：`references/first-person-tragedy.md` `references/character-voice-makoto.md`）
+3. 誠の一人称に徹する。内省を恐れず、自然な回想を溶け込ませる（参照：`references/first-person-tragedy.md`）
 4. 書いた後：字数確認（5,000〜8,000字）・禁用語チェック・標点正規化・追跡更新
 5. 参照：`references/banned-words.md`、スクリプト `scripts/normalize-punctuation.js`
 
