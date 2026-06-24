@@ -283,11 +283,11 @@ node scripts/jjwxc-rank-scraper.js --type 12 --list-only                 # リ�
 
 ### Phase 4：題材決定
 
-スキャン結果を直接使える題材提案に変換し、`选题决策.md` を出力。完全な方法（題材4ステップ + 実現可能性判断 + 出力テンプレート）は [references/topic-decision.md](references/topic-decision.md) 参照。
+スキャン結果を直接使える題材提案に変換し、`テーマ决策.md` を出力。完全な方法（題材4ステップ + 実現可能性判断 + 出力テンプレート）は [references/topic-decision.md](references/topic-decision.md) 参照。
 
 **情報不足の場合、ユーザーにプロジェクト条件を確認：**「ターゲットプラットフォーム、既存素材、得意な題材/執筆制約、予定文字数は？」
 
-`topic-decision.md` の題材4ステップに従い、2-3 の推奨題材を出力（ヒットする理由 → 市場検証 → 差別化ポジショニング → 実現可能性+失敗リスク+検証アクション）、**今回のスキャン出力ディレクトリ** `{outdir}/选题决策.md` に書き込み、ユーザーにパスと次の手順を知らせる：「開書時に `选题决策.md` を小説プロジェクトルートに置けば、執筆時に自動的に読み込まれます；「ヒットする理由」を確認したい場合は、まず `/story-long-analyze` で対標書を分析してください。」
+`topic-decision.md` の題材4ステップに従い、2-3 の推奨題材を出力（ヒットする理由 → 市場検証 → 差別化ポジショニング → 実現可能性+失敗リスク+検証アクション）、**今回のスキャン出力ディレクトリ** `{outdir}/テーマ决策.md` に書き込み、ユーザーにパスと次の手順を知らせる：「開書時に `テーマ决策.md` を小説プロジェクトルートに置けば、執筆時に自動的に読み込まれます；「ヒットする理由」を確認したい場合は、まず `/story-long-analyze` で対標書を分析してください。」
 
 **ハードルール：**
 - 実現可能性の上限：ランキングに `[データ疎ら]` とマークされている、または同方向のサンプル <15（小規模プラットフォーム <10）の場合、「高」を許さず、強制的に「中」に引き下げ + 先に検証すべきと明記；内蔵知識モードは一律「中」。
@@ -319,7 +319,7 @@ node scripts/jjwxc-rank-scraper.js --type 12 --list-only                 # リ�
 | 直接書き始める | story-long-write | `/story-long-write` |
 | 短編の方が適している | story-short-scan | `/story-short-scan` |
 
-> **选题决策.md 引継ぎ**：Phase 4 で出力した `选题决策.md` はスキャン出力ディレクトリに書き込まれる（スキャンは小説プロジェクトがない状態で行われることが多い）。開書時に小説プロジェクトルートに移動し、story-long-write Phase 1 が自動的に読み込む；分析（story-long-analyze）は集計レポート出力後に対応する題材の「ヒットする理由」を埋め戻す。
+> **テーマ决策.md 引継ぎ**：Phase 4 で出力した `テーマ决策.md` はスキャン出力ディレクトリに書き込まれる（スキャンは小説プロジェクトがない状態で行われることが多い）。開書時に小説プロジェクトルートに移動し、story-long-write Phase 1 が自動的に読み込む；分析（story-long-analyze）は集計レポート出力後に対応する題材の「ヒットする理由」を埋め戻す。
 
 ## 参考资料
 
@@ -327,7 +327,7 @@ node scripts/jjwxc-rank-scraper.js --type 12 --list-only                 # リ�
 
 | ファイル | いつ読み込むか |
 |------|----------|
-| [references/topic-decision.md](references/topic-decision.md) | Phase 4 題材決定：題材4ステップ + 実現可能性判断 + 选题决策.md テンプレート |
+| [references/topic-decision.md](references/topic-decision.md) | Phase 4 題材決定：題材4ステップ + 実現可能性判断 + テーマ决策.md テンプレート |
 | [references/reader-profiling.md](references/reader-profiling.md) | ターゲット読者像の分析が必要な場合 |
 | [references/genre-trends.md](references/genre-trends.md) | 題材トレンド候補、切入制約、サンプル検証ルールの確認時 |
 | [references/publishing-guide.md](references/publishing-guide.md) | プラットフォーム適応+推薦メカニズム検証+データ指標+概要設計 |
@@ -344,4 +344,4 @@ node scripts/jjwxc-rank-scraper.js --type 12 --list-only                 # リ�
 ## 言語
 
 - ユーザーの言語に従って返信する。ユーザーが使用する言語で返信。
-- 中国語の返信は《中文文案排版指北》に従う。
+- 日本語の返信は日本語文体ルール（一文短く・句読点適切・会話調）に従う。

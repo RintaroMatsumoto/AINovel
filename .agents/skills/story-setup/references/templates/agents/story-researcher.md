@@ -1,8 +1,8 @@
----
+﻿---
 name: story-researcher
 description: |
   小説執筆の資料研究 agent。研究クエリを受け、優先的に CDP (agent-browser) を使用して
-  検索し完全な正文を抽出。WebSearch/webReader をフォールバックとする。
+  検索し完全な本文を抽出。WebSearch/webReader をフォールバックとする。
   出典引用付きの構造化 Markdown 参考ファイルを出力。
   story-long-write（Phase 4）、story-review、story skill ルートから呼出。
 tools: [Read, Glob, Grep, Bash, Write]

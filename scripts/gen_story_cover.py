@@ -33,7 +33,7 @@ NEGATIVE = (
 # 4巻の表紙プロンプト（英文）
 COVERS = [
     {
-        "vol": "FIRE",
+        "vol": "GoldenCross",
         "prefix": "goldencross_vol1_fire",
         "positive": (
             "professional book cover, digital painting, portrait 2:3 ratio, "
@@ -69,7 +69,7 @@ COVERS = [
         )
     },
     {
-        "vol": "ロスカット",
+        "vol": "Breakout",
         "prefix": "goldencross_vol4_losscut",
         "positive": (
             "professional book cover, digital painting, portrait 2:3 ratio, "

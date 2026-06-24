@@ -29,10 +29,10 @@
 ### 不碰
 
 这些文件完全由用户管理：
-- `{书名}/追踪/上下文.md` — 用户写作上下文
-- `{书名}/追踪/伏笔.md` — 用户伏笔追踪
+- `{书名}/追跡/上下文.md` — 用户写作上下文
+- `{书名}/追跡/伏線.md` — 用户伏線追跡
 - `.active-book` — 用户活跃书目
-- 短篇项目的 `追踪/` — setup/hooks 不应为短篇自动创建
+- 短篇项目的 `追跡/` — setup/hooks 不应为短篇自动创建
 
 ## 版本检测
 
@@ -42,14 +42,14 @@
 - `agents_version: 2` → 旧版，需重新部署以获取 story-explorer agent
 - `agents_version: 3` → 旧版，需重新部署以获取 story-explorer agent
 - `agents_version: 4` → 旧版，需重新部署以获取 chapter-extractor agent
-- `agents_version: 5` → 旧版，需重新部署以统一短篇主会话/子代理正文格式
-- `agents_version: 6` → 旧版，需重新部署以获取日更续写与伏笔 hook 修复
+- `agents_version: 5` → 旧版，需重新部署以统一短篇主会话/子代理本文格式
+- `agents_version: 6` → 旧版，需重新部署以获取日更续写与伏線 hook 修复
 - `agents_version: 7` → 旧版，需重新部署以获取 Agent 参考文件路径修复
 - `agents_version: 8` → 旧版，需重新部署以获取 hook lib、reference bundle、root-aware hook 与短篇无副作用修复
 - `agents_version: 9` → 旧版，需重新部署以获取新版写作 Agent
-- `agents_version: 10` → 旧版，需重新部署以获取写正文前细纲守卫 hook、长短交错/疏密写作规则与部署后重启提示
-- `agents_version: 11` → 旧版，需重新部署以获取拆文「关键信息与扩写技法」「情绪模块/节奏」产物及日更消费链 + 推理型一致性检查 + 自然分段与主语节奏规则
-- `agents_version: 12` → 旧版，需重新部署以获取章节蓝图细纲与语气标点谱系
+- `agents_version: 10` → 旧版，需重新部署以获取写本文前細綱守卫 hook、长短交错/疏密写作规则与部署后重启提示
+- `agents_version: 11` → 旧版，需重新部署以获取分析「关键信息与扩写技法」「情绪模块/节奏」产物及日更消费链 + 推理型一致性检查 + 自然分段与主语节奏规则
+- `agents_version: 12` → 旧版，需重新部署以获取章节蓝图細綱与语气标点谱系
 - `agents_version: 13` → 当前版本
 
 ## 版本变更
@@ -63,7 +63,7 @@
 
 ### v3
 
-- 新增 story-explorer 只读查询 Agent（角色/伏笔/设定/进度查询，日更上下文快速加载）
+- 新增 story-explorer 只读查询 Agent（キャラ/伏線/設定/进度查询，日更上下文快速加载）
 - 6 个 Agent 总计（story-architect, character-designer, narrative-writer, consistency-checker, story-researcher, story-explorer）
 - story-explorer 被 story-long-write、story-review、story 路由集成调用
 
@@ -80,19 +80,19 @@
 
 ### v6
 
-- 统一 narrative-writer 子代理与主会话的短篇正文格式：固定写入 `正文.md`、小节标记统一、段落无空行、对话半角双引号
-- 短篇写作不再由 narrative-writer 创建长篇 `追踪/上下文.md`
+- 统一 narrative-writer 子代理与主会话的短篇本文格式：固定写入 `本文.md`、小节标记统一、段落无空行、对话半角双引号
+- 短篇写作不再由 narrative-writer 创建长篇 `追跡/上下文.md`
 
 ### v7
 
-- 修复长篇 `/story-long-write 日更` 批量续写中的 continuation 规则：同一批次内“继续/续写/日更”保持在 daily workflow，不直接跳到正文续写。
-- 修复 `detect-story-gaps.sh` 对伏笔表头和正常开放伏笔（`未埋`/`已埋`）的误报；SessionStart 只提示 `已过期` 或异常状态。
+- 修复长篇 `/story-long-write 日更` 批量续写中的 continuation 规则：同一批次内“继续/续写/日更”保持在 daily workflow，不直接跳到本文续写。
+- 修复 `detect-story-gaps.sh` 对伏線表头和正常开放伏線（`未埋`/`已埋`）的誤検出；SessionStart 只提示 `已过期` 或异常状态。
 - 已部署项目需重新运行 `/story-setup`，以覆盖 `.claude/hooks/`、`.claude/agents/`、`.claude/rules/` 并获得新版 hook 行为。
 
 ### v8
 
 - 修复 story-review 及部署后的 reviewer Agent 在项目根目录下读取参考文件时，只找裸文件名（如 `quality-checklist.md`）导致找不到 skill references 的问题。
-- Agent 模板新增参考文件路径规则：优先从 `.claude/skills/` 或 `skills/` 拼接解析 `story-setup/references/agent-references/*.md` 规范路径，避免依赖当前工作目录且不跨 skill 引用 references。
+- Agent 模板新增参考文件路径规则：优先から `.claude/skills/` 或 `skills/` 拼接解析 `story-setup/references/agent-references/*.md` 规范路径，避免依赖当前工作目录且不跨 skill 引用 references。
 - 已部署项目需重新运行 `/story-setup`，以覆盖 `.claude/agents/` 并获得新版参考文件路径规则。
 
 ### v9
@@ -102,24 +102,24 @@
 - Hook 部署从“只复制 `.sh` 文件”改为递归复制完整 `references/templates/hooks/` 目录树，避免遗漏 `lib/common.sh`；新增 `lib/sentinel.sh` 统一读取 `.story-deployed` 字段。
 - Hook runtime 改为 root-aware：优先使用 `CLAUDE_PROJECT_DIR`，其次 git root，最后 cwd；`discover_active_book` 与 `discover_all_books` 分离，避免单本会话逻辑和全项目巡检互相污染。
 - `detect-story-gaps.sh` 使用 bash 3.2 兼容数组/去重逻辑，并从公共库获取所有书目。
-- `session-end.sh` 默认不写 `session-log.txt`；显式 `STORY_SESSION_LOG=1` 时也只写已存在的长篇 `追踪/`，不会为短篇创建 `追踪/`。
+- `session-end.sh` 默认不写 `session-log.txt`；显式 `STORY_SESSION_LOG=1` 时也只写已存在的长篇 `追跡/`，不会为短篇创建 `追跡/`。
 - `validate-story-commit.sh` 增加脚本内自检：解析 `CLAUDE_TOOL_INPUT.command` / `STORY_COMMIT_COMMAND` 后只对真实 `git commit` 生效，避免 `echo git commit docs` 这类非提交命令误触发。
 - Agent Reference bundle 补齐并 canonicalize：
-  - `genre-readers.md`：从 `story-long-write/references/genre-readers.md` 复制为 story-setup canonical 副本。
-  - `genre-writing-formulas.md`：从 `story-long-write/references/genre-writing-formulas.md` 复制为 story-setup canonical 副本。
-  - `emotional-methods.md`：从 `story-long-write/references/emotional-methods.md` 复制为 story-setup canonical 副本。
-  - `style-combat-face.md`：从 `story-long-write/references/style-combat-face.md` 复制为 story-setup canonical 副本。
+  - `genre-readers.md`：から `story-long-write/references/genre-readers.md` 复制为 story-setup canonical 副本。
+  - `genre-writing-formulas.md`：から `story-long-write/references/genre-writing-formulas.md` 复制为 story-setup canonical 副本。
+  - `emotional-methods.md`：から `story-long-write/references/emotional-methods.md` 复制为 story-setup canonical 副本。
+  - `style-combat-face.md`：から `story-long-write/references/style-combat-face.md` 复制为 story-setup canonical 副本。
   - `output-templates.md`：不复制；`chapter-extractor` 已内置输出格式，旧的裸引用改写为“遵循本文件输出格式”。
-- `story-format.md` 删除“章节之间用 `---` 分隔”的旧规则，改为禁止正文片段使用水平分隔线，与 narrative-writer 保持一致。
+- `story-format.md` 删除“章节之间用 `---` 分隔”的旧规则，改为禁止本文片段使用水平分隔线，与 narrative-writer 保持一致。
 
 ### v10
 
-已部署项目请重新运行 `/story-setup`，刷新写作 Agent；主要影响是日更续写更稳定地沿用对标文风。
+已部署项目请重新运行 `/story-setup`，刷新写作 Agent；主要影响是日更续写更稳定地沿用参照文风。
 
 ### v11
 
 - `setup_skill_version` 升级到 `1.2.0`，`.story-deployed` 的 `agents_version` 升级到 `11`。
-- **新增写正文前流程守卫 hook** `guard-outline-before-prose.sh`（PreToolUse Write/Edit/MultiEdit）：首次创建 `正文/第N章_*.md` 时若缺 `大纲/细纲_第N章.md`、首次创建短篇 `正文.md` 时若缺 `小节大纲.md`，直接阻断（exit 2），强制先搭大纲再写正文。正文已存在（续写/去AI味/改稿）或非正文文件一律放行。
+- **新增写本文前流程守卫 hook** `guard-outline-before-prose.sh`（PreToolUse Write/Edit/MultiEdit）：首次创建 `本文/第N章_*.md` 时若缺 `大綱/細綱_第N章.md`、首次创建短篇 `本文.md` 时若缺 `小节大綱.md`，直接阻断（exit 2），强制先搭大綱再写本文。本文已存在（续写/去AI味/改稿）或非本文文件一律放行。
 - **部署后必须新开会话**：custom agents 只在会话启动时注册成 `subagent_type`。`/story-setup` 部署完会留下一次性标记 `.claude/.agents-pending-restart`，session-start.sh 在下个会话确认 agents 已注册并清除标记。部署当前会话内 spawn agent 仍会降级 solo——必须新开 Claude Code 会话。
 - **写作规则补「长短交错 + 疏密分配」**：`format-and-structure.md` 段落节奏不再使用固定字数上限的一刀切，改为按戏剧单元、情绪 beat 和疏密分配自然断段；`writing-craft.md` 新增「疏密分配（详略不均）」；`anti-ai-writing.md` 长短句交错改为可执行的自然节奏目标；narrative-writer 模板补 Gate D 长短变化与「句式多样性」审查；story-review 段落 gate 由旧字数上限改为查长短/疏密变化。针对生成内容文学味过重、句式单一、节奏平坦的反馈。
 - 已部署项目重新运行 `/story-setup` 刷新 hooks/agents/references；**部署后新开会话**。
@@ -127,9 +127,9 @@
 ### v12
 
 - `setup_skill_version` 升级到 `1.2.1`，`.story-deployed` 的 `agents_version` 升级到 `12`。
-- **拆文→写作模块链（issue #149）**：`story-long-analyze` Stage 2 摘要新增「关键信息与扩写技法」表，Stage 3 产出权威产物 `剧情/节奏.md`（关键信息推进 / 情绪触动点 / 爆发节奏）与 `剧情/情绪模块.md`（读者需求·情绪引擎 / 可复现模块）；`story-import` 同步到 `对标/{书名}/剧情/`；`story-long-write` 日更按权威优先级读取并复现。
+- **分析→写作模块链（issue #149）**：`story-long-analyze` Stage 2 摘要新增「关键信息与扩写技法」表，Stage 3 产出权威产物 `プロット/节奏.md`（关键信息推进 / 情绪触动点 / 爆发节奏）与 `プロット/情绪模块.md`（读者需求·情绪引擎 / 可复现模块）；`story-import` 同步到 `参照/{书名}/プロット/`；`story-long-write` 日更按权威优先级读取并复现。
 - **agent 模板更新**：`chapter-extractor` 增加「关键信息与扩写技法」提取，`story-explorer` 的 `benchmark_style_load` 增加 `selected_emotion_module`/`rhythm_reference` 等返回字段。**已部署项目须重新运行 `/story-setup` 才能拿到新 agent 行为**；否则日更回退到主会话手动加载（功能不丢，仅失去 agent 快捷路径）。
-- `consistency-checker` 从纯 grep-first 字面矛盾扩展为「grep-first + 推理型一致性审查」：补查规则边界悖论、设定层级冲突、跨章因果链、规则可滥用漏洞、代价一致性。
+- `consistency-checker` 从纯 grep-first 字面矛盾扩展为「grep-first + 推理型一致性审查」：补查规则边界悖论、設定层级冲突、跨章因果链、规则可滥用漏洞、代价一致性。
 - **自然分段 + 主语节奏**：`format-and-structure.md` 与 `writing-craft.md` 不再把 `60/45` 字数当成硬切分规则，改为按戏剧单元/镜头/一件事结束分段；完整推理链、氛围铺陈、情绪变化可保留稍长段。
 - **主语过密修复**：narrative-writer 模板和 story-review 检查项新增“段首点名建立主语、段中代词/省略、关键转折再点名”的节奏规则，不按全章名字次数一刀切。
 - 已部署项目重新运行 `/story-setup` 刷新 agents/references；**部署后新开会话**。
@@ -137,7 +137,7 @@
 ### v13 (当前)
 
 - `setup_skill_version` 升级到 `1.2.2`，`.story-deployed` 的 `agents_version` 升级到 `13`。
-- **细纲升级为章节蓝图（issues #162）**：新建/补建长篇 `大纲/细纲_第XXX章.md` 时，除旧字段外新增内容概括（起因/发展/转折/高潮/结尾）、情节安排（主线/辅线/事件线/感情线/逻辑线）、人物关系和出场顺序、情节细化、结尾设定和钩子；旧版细纲仍可续写，缺失字段不阻塞，回填未知项写 `[待补充]`。
-- **语气标点谱系（issue #161）**：writer references、narrative-writer、review/deslop 增加“标点跟着语气/人物声线走”的规则，避免通篇句号化，也禁止随机堆砌问号/感叹号；犹豫/未尽/打断/拖长改用动作停顿、短句或换行处理，正文产物不用 `……`、不用 `——`，知乎盐言 `「」` 引号风格继续有效。
-- `story-architect` 会产出新版章节蓝图；`consistency-checker` 会消费细纲里的逻辑线、人物关系变化、出场顺序和代价/收益兑现；`narrative-writer` 会按语气标点谱系执行正文标点节奏。
+- **細綱升级为章节蓝图（issues #162）**：新建/补建长篇 `大綱/細綱_第XXX章.md` 时，除旧字段外新增内容概括（起因/发展/转折/高潮/结尾）、プロット安排（主线/辅线/事件线/感情线/論理線）、人物关系和出场顺序、プロット细化、结尾設定和钩子；旧版細綱仍可续写，缺失字段不阻塞，回填未知项写 `[待补充]`。
+- **语气标点谱系（issue #161）**：writer references、narrative-writer、review/deslop 增加“标点跟着语气/人物声线走”的规则，避免通篇句号化，也禁止随机堆砌问号/感叹号；犹豫/未尽/打断/拖长改用动作停顿、短句或换行处理，本文产物不用 `……`、不用 `——`，知乎盐言 `「」` 引号风格继续有效。
+- `story-architect` 会产出新版章节蓝图；`consistency-checker` 会消费細綱里的論理線、人物关系变化、出场顺序和代价/收益兑现；`narrative-writer` 会按语气标点谱系执行本文标点节奏。
 - 已部署项目请重新运行 `/story-setup` 刷新 hooks/agents/references；**部署后新开会话**，否则旧会话仍使用 v12 agent 定义。

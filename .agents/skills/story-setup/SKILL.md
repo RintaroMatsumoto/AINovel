@@ -21,7 +21,7 @@ metadata:
 
 1. 現在のディレクトリが既にデプロイ済みか確認（`.story-deployed` の存在）
    - 既にある場合 → AskUserQuestion で再デプロイするか確認
-2. 書名ディレクトリ（`追踪/` サブディレクトリを含むディレクトリ、またはユーザー定義構造）があるか確認
+2. 書名ディレクトリ（`追跡/` サブディレクトリを含むディレクトリ、またはユーザー定義構造）があるか確認
    - あり → 長編プロジェクトとして認識、現在のプロジェクト情報を表示
    - なし → 新規プロジェクトまたは短編プロジェクトとして認識
 3. `.claude/settings.local.json` の存在確認
@@ -45,7 +45,7 @@ AskUserQuestion でデプロイ位置を確認後、順次実行。
 | `skills/story-setup/references/templates/agents/*.md` | `.opencode/agents/*.md` | story-setup managed | replace | 7 agent files exist |
 | `skills/story-setup/references/agent-references/*.md` | `.claude/skills/story-setup/references/agent-references/*.md` | story-setup managed | replace | every `story-setup/references/agent-references/*.md` reference resolves |
 | `skills/story-setup/references/templates/settings-hooks.json` | `.claude/settings.local.json` | user+managed | merge by hook command | hook JSON valid and registered commands deduped |
-| `skills/story-setup/references/templates/上下文.md.tmpl` | `{書名}/追踪/上下文.md` | user state | create only if absent | never overwrite existing writing context |
+| `skills/story-setup/references/templates/上下文.md.tmpl` | `{書名}/追跡/上下文.md` | user state | create only if absent | never overwrite existing writing context |
 | generated sentinel | `.story-deployed` | story-setup managed | replace | contains `agents_version`, `setup_skill_version`, `target_cli`, `resolver_strategy`, `references_dir` |
 
 ### 2.1 CLAUDE.md のデプロイ
@@ -88,8 +88,8 @@ AskUserQuestion でデプロイ位置を確認後、順次実行。
 ### 2.5 Session State テンプレートのデプロイ
 
 - `skills/story-setup/references/templates/上下文.md.tmpl` を読み込み
-- 長編書目として認識され、かつ `{書名}/追踪/` が既に存在する場合のみ、不足している `{書名}/追踪/上下文.md` を作成
-- ターゲットファイルが既に存在する場合は上書きしない；短編プロジェクトではこれにより `追踪/` ディレクトリを作成してはならない
+- 長編書目として認識され、かつ `{書名}/追跡/` が既に存在する場合のみ、不足している `{書名}/追跡/上下文.md` を作成
+- ターゲットファイルが既に存在する場合は上書きしない；短編プロジェクトではこれにより `追跡/` ディレクトリを作成してはならない
 
 ### 2.6 Hooks 登録を settings.local.json にマージ
 
