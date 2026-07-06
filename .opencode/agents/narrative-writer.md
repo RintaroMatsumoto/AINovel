@@ -2,7 +2,7 @@
 description: 本文執筆・AI臭除去の専門家。三層織り込み、感情アーク実行、禁用語置換。
 mode: subagent
 color: "#4CAF50"
-temperature: 0.8
+temperature: 0.4
 steps: 30
 permission:
   read: allow
