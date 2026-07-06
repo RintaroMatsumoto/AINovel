@@ -30,7 +30,7 @@ permission:
 | `character_appearances` | キャラ登場章 | 「栞は何章に登場？」 |
 | `foreshadow_status` | 特定伏線状態 | 「伏線 F003 の状態は？」 |
 | `foreshadow_list` | 伏線一覧 | 「現在の未回収伏線は？」 |
-| `setting_appearances` | 設定登場位置 | 「勢力体系は何章で言及？」 |
+| `setting_appearances` | 設定登場位置 | 「組織関係は何章で言及？」 |
 | `setting_detail` | 設定詳細 | 「トレードの技能体系は？」 |
 | `timeline` | 時間線ノード | 「第30-50章の出来事は？」 |
 | `progress` | 進捗 | 「今どこまで書いた？」 |
