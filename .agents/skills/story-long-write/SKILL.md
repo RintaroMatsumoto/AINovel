@@ -56,20 +56,34 @@ description: |
 3. 情報開示のタイミングを決める——読者は百合子視点で誠より先に真実を知り、誠視点で誠の誤解を追体験する。二層の劇的アイロニー（参照：`references/dramatic-irony.md`）
 4. 各章の計画書を作成する
 
-### Phase 4：執筆
+### Phase 4：執筆（全エージェント委任）
 
-1. **narrative-writer agent を spawn して本文を書かせる**
-2. 写前準備：本章に関わるキャラ状態・封筒の進行段階・回想の有無・誠の文体段階を確認
-3. **誠視点の章**では誠の一人称に徹する。内省を恐れず、自然な回想を溶け込ませる。**百合子視点の章**では百合子の一人称で過去の真実を開示する（参照：`references/first-person-tragedy.md`）
-4. 書いた後：字数確認（5,000〜8,000字）・禁用語チェック・標点正規化・追跡更新
-5. 参照：`references/banned-words.md`、スクリプト `scripts/normalize-punctuation.js`
+全工程は `novels/参考/執筆ワークフロー_v2.md` 参照。以下は概要。
 
-### Phase 5：品質チェック
+**1章あたりのパイプライン**:
+1. **Step 0: 引継ぎ準備** — story-explorer spawn。参照ファイル特定＋前章末尾取得
+2. **Step 1: narrative-writer spawn** — 初稿執筆
+3. **Step 2a: consistency-checker spawn** — 事実矛盾 S1-S4 レポート（Step 2b と並列）
+4. **Step 2b: chapter-extractor spawn** — 要約＋情節＋キャラ抽出（Step 2a と並列）
+5. **Step 3: S1/S2 あり → narrative-writer 再spawn**（修正）。なければスキップ
+6. **Step 4: メインAI 最終チェック**（8工程）＋ ユーザー確認
 
-- 禁用語スキャン（万能比喩・章末総括は厳格に。心理フィルター語・会話タグは過剰使用のみ警告）
+**3章ごと**: story-review lean spawn + 字数確認 + 感情弧線連続性チェック + 伏線債務計算
+
+**巻末**: story-review full spawn（4 reviewer agent）
+
+参照: `references/banned-words.md`、`scripts/normalize-punctuation.js`、`novels/参考/執筆ワークフロー_v2.md`
+
+### Phase 5：品質チェック（メインAI + ユーザー）
+
+- 字数検証（5,000〜8,000字）
+- 章末チェック（余韻）
+- 元情報スキャン（工程語混入）
 - 標点正規化
+- 禁用語スキャン
 - 感情目標達成度の自己評価
-- 追跡ファイル更新
+- 追跡ファイル更新（伏線・キャラ状態・文脈）
+- ユーザー最終確認
 
 ---
 
@@ -81,8 +95,10 @@ description: |
 |------------|------|
 | story-architect | 物語構造・巻構成の検証 |
 | character-designer | キャラ設定・7次元言語スタイルの検証 |
-| narrative-writer | 本文執筆（Phase 4 で必須） |
-| consistency-checker | 事実整合性チェック |
+| narrative-writer | 本文執筆（Phase 4 Step 1 で必須） |
+| consistency-checker | 事実整合性チェック（Phase 4 Step 2a で必須） |
+| chapter-extractor | 要約・情節点・キャラ抽出（Phase 4 Step 2b で必須） |
+| story-explorer | 参照ファイル探索（Phase 4 Step 0 で推奨） |
 | story-researcher | 外部資料調査 |
 
 ---
