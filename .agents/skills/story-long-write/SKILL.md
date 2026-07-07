@@ -68,8 +68,6 @@ description: |
 5. **Step 3: S1/S2 あり → narrative-writer 再spawn**（修正）。なければスキップ
 6. **Step 4: メインAI 最終チェック**（8工程）＋ ユーザー確認
 
-**3章ごと**: story-review lean spawn + 字数確認 + 感情弧線連続性チェック + 伏線債務計算
-
 **巻末**: story-review full spawn（4 reviewer agent）
 
 参照: `references/banned-words.md`、`scripts/normalize-punctuation.js`、`novels/参考/執筆ワークフロー_v2.md`
@@ -130,6 +128,12 @@ description: |
 - `references/outline-methods.md` —— 構成手法
 - `references/cross-book-recall.md` —— 多巻連携
 - `scripts/normalize-punctuation.js` —— 標点正規化
+
+### プロジェクト参照（novels/参考/）
+- `novels/参考/執筆ワークフロー_v2.md` —— 1章パイプライン全工程
+- `novels/参考/narrative-writer引継ぎ手順.md` —— 参照ファイル特定手順
+- `novels/参考/調査_野島伸司_文体感情描写技法.md` —— 創作4原理（枷と愛／感情を恐れない／描かないことで描く／弱さの肯定）
+- `novels/設定/文体プロファイル.md` —— 7次元スタイル・巻別文体戦略
 
 ---
 

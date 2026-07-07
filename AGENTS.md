@@ -103,8 +103,6 @@ AIと協力して小説を書くための統合パイプライン。
   5. Step 3: S1/S2 がある場合 → narrative-writer 再spawn（事実修正）。なければスキップ
   6. Step 4: メインAIによる最終チェック（8工程）＋ ユーザー確認
 
-**3章ごとの中間スナップショット**: story-review lean spawn + 字数確認 + 感情弧線連続性チェック + 伏線債務計算
-
 **巻末**: story-review full spawn（4 reviewer agent）
 
 ## スキル使用ルール
@@ -134,15 +132,17 @@ AIと協力して小説を書くための統合パイプライン。
 13. **感情目標達成度チェック**: 宣言した感情目標に対し 0〜10 で評価。6未満 → ユーザーに報告
 14. **追跡更新**: `追跡/伏線.md` / `追跡/キャラ状態.md` / `追跡/文脈.md` を更新（chapter-extractor の抽出結果を下書きに）
 
-### 3章ごとの中間スナップショット
-15. **story-review lean spawn**: story-architect + consistency-checker で巻全体の整合性をチェック
-16. **感情弧線連続性**: 直近3章の感情変化が単調でないか確認
+### 巻末のレビュー
+15. **story-review full spawn**: 4 reviewer agent で全章をレビュー
+16. **感情弧線連続性**: 巻全体の感情変化が単調でないか確認
 17. **伏線債務計算**: CC = active伏線数 - resolved伏線数。CC > 2 → ユーザーに警告
 
 ### 既存インフラ
 - **主参照**: 村上春樹（文体・一人称・回想技法のベース）`novels/参考/調査_村上春樹全長編_誠翼適合性.md`
 - **構造参考**: 1Q84（POV交差・情報非対称・伏線設計のみ。文体は参考にしない）`novels/参考/調査_1Q84構造分析.md` `novels/参考/調査_1Q84_POV分析.md`
 - **栞編参照**: 金原ひとみ＋桐野夏生（女性一人称）`novels/参考/調査_栞の声_女性一人称モデル.md`
+- **創作原理参照**: 野島伸司（枷と愛・感情を恐れない・描かないことで描く・弱さの肯定）`novels/参考/調査_野島伸司_文体感情描写技法.md`
+- **執筆ワークフロー**: `novels/参考/執筆ワークフロー_v2.md`（全工程エージェント委任）`novels/参考/narrative-writer引継ぎ手順.md`（参照ファイル特定手順）
 - 禁用詞: `.agents/skills/story-long-write/references/banned-words.md`
 - 標点正規化: `.agents/skills/story-long-write/scripts/normalize-punctuation.js`
 - 字数カウント: py で実行（python3→python→py の順に探査、Windowsではpyが安定）
