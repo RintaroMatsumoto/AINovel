@@ -2,7 +2,7 @@
 
 <!--
 version: 3.0.0-jp
-sync-source: DayTrade 文体方針（村上春樹の一人称小説を基調・抑制された内省・自然な回想）
+sync-source: DayTrade 文体方針（村上春樹の一人称小説を基調・自然な時間交差・激しい感情の人間ドラマ）
 本ファイルは 6 つの skill 間で同一内容を維持：
   story-deslop / story-long-write / story-short-write /
   story-short-analyze / story-review / story-setup
