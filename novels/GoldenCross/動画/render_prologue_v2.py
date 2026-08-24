@@ -56,8 +56,7 @@ for _ in range(8): all_lines.append(("", "blank"))
 
 n_lines = len(all_lines)
 content_h = n_lines * LINE_H
-scroll_h = H + content_h + H * 2
-init_off = H - 200
+scroll_h = content_h + 200 + H
 
 print(f"Lines:{n_lines} Strip:{scroll_h}px TTS:{TTS_DUR:.0f}s")
 
@@ -68,7 +67,7 @@ fb = ImageFont.truetype(FONT_PATH, FONT_SIZE)
 ft = ImageFont.truetype(FONT_PATH, 52)
 fe = ImageFont.truetype(FONT_PATH, 40)
 
-yp = init_off + H
+yp = 200
 for txt, tp in all_lines:
     if tp == "title":
         w2 = d.textlength(txt, font=ft)
@@ -109,7 +108,7 @@ print("BG video OK")
 
 # --- FFmpeg Step2: テキストスクロール ---
 txt_vid = os.path.join(TMP, "_txt.mp4")
-rate = scroll_distance / TTS_DUR if 'scroll_distance' in dir() else (scroll_h - H - init_off) / TTS_DUR
+rate = scroll_distance / TTS_DUR if 'scroll_distance' in dir() else (scroll_h - H - 200) / TTS_DUR
 vf = f"crop={W}:{H}:0:'max(0,min(ih-{H},trunc(t*{rate:.3f})))',format=rgba"
 subprocess.run([FFMPEG, "-y", "-loglevel", "error",
     "-loop", "1", "-framerate", str(FPS), "-i", strip_p,
