@@ -1,0 +1,31 @@
+{
+ "total_chars": 1615,
+ "total_duration": 294.62,
+ "scroll_speed_cps": 5.48,
+ "chunks": [
+  {
+   "duration": 78.6,
+   "chars": 430,
+   "scroll_start": 0.0,
+   "scroll_end": 78.6
+  },
+  {
+   "duration": 79.73,
+   "chars": 441,
+   "scroll_start": 78.6,
+   "scroll_end": 158.33
+  },
+  {
+   "duration": 82.87,
+   "chars": 448,
+   "scroll_start": 158.33,
+   "scroll_end": 241.2
+  },
+  {
+   "duration": 53.42,
+   "chars": 293,
+   "scroll_start": 241.2,
+   "scroll_end": 294.62
+  }
+ ]
+}
