@@ -1,0 +1,145 @@
+{
+ "total_chars": 5412,
+ "total_duration": 964.87,
+ "scroll_speed_cps": 5.61,
+ "chunks": [
+  {
+   "duration": 46.23,
+   "chars": 238,
+   "scroll_start": 0.0,
+   "scroll_end": 46.23
+  },
+  {
+   "duration": 34.84,
+   "chars": 202,
+   "scroll_start": 46.23,
+   "scroll_end": 81.07
+  },
+  {
+   "duration": 45.97,
+   "chars": 256,
+   "scroll_start": 81.07,
+   "scroll_end": 127.04
+  },
+  {
+   "duration": 37.08,
+   "chars": 196,
+   "scroll_start": 127.04,
+   "scroll_end": 164.12
+  },
+  {
+   "duration": 45.86,
+   "chars": 273,
+   "scroll_start": 164.12,
+   "scroll_end": 209.98
+  },
+  {
+   "duration": 23.69,
+   "chars": 132,
+   "scroll_start": 209.98,
+   "scroll_end": 233.67
+  },
+  {
+   "duration": 40.34,
+   "chars": 209,
+   "scroll_start": 233.67,
+   "scroll_end": 274.01
+  },
+  {
+   "duration": 45.35,
+   "chars": 259,
+   "scroll_start": 274.01,
+   "scroll_end": 319.36
+  },
+  {
+   "duration": 44.52,
+   "chars": 246,
+   "scroll_start": 319.36,
+   "scroll_end": 363.88
+  },
+  {
+   "duration": 46.2,
+   "chars": 255,
+   "scroll_start": 363.88,
+   "scroll_end": 410.08
+  },
+  {
+   "duration": 43.4,
+   "chars": 249,
+   "scroll_start": 410.08,
+   "scroll_end": 453.48
+  },
+  {
+   "duration": 36.98,
+   "chars": 204,
+   "scroll_start": 453.48,
+   "scroll_end": 490.46
+  },
+  {
+   "duration": 46.68,
+   "chars": 267,
+   "scroll_start": 490.46,
+   "scroll_end": 537.14
+  },
+  {
+   "duration": 43.82,
+   "chars": 240,
+   "scroll_start": 537.14,
+   "scroll_end": 580.96
+  },
+  {
+   "duration": 47.44,
+   "chars": 274,
+   "scroll_start": 580.96,
+   "scroll_end": 628.4
+  },
+  {
+   "duration": 38.58,
+   "chars": 233,
+   "scroll_start": 628.4,
+   "scroll_end": 666.98
+  },
+  {
+   "duration": 49.96,
+   "chars": 275,
+   "scroll_start": 666.98,
+   "scroll_end": 716.94
+  },
+  {
+   "duration": 38.47,
+   "chars": 222,
+   "scroll_start": 716.94,
+   "scroll_end": 755.41
+  },
+  {
+   "duration": 48.36,
+   "chars": 269,
+   "scroll_start": 755.41,
+   "scroll_end": 803.77
+  },
+  {
+   "duration": 35.02,
+   "chars": 200,
+   "scroll_start": 803.77,
+   "scroll_end": 838.79
+  },
+  {
+   "duration": 41.95,
+   "chars": 224,
+   "scroll_start": 838.79,
+   "scroll_end": 880.74
+  },
+  {
+   "duration": 46.21,
+   "chars": 263,
+   "scroll_start": 880.74,
+   "scroll_end": 926.95
+  },
+  {
+   "duration": 37.92,
+   "chars": 204,
+   "scroll_start": 926.95,
+   "scroll_end": 964.87
+  }
+ ]
+}
