@@ -411,3 +411,27 @@ IPAdapter STANDARD + weight 0.45 + weight_type "standard" で全情報を一度�
 3. 誠40歳（崩壊後）の顔生成
 4. 金子雅也・神崎大輔の顔生成（必要な場合）
 5. 表紙生成に進む（story-cover）
+
+### 2026-08-25: プロジェクト整理整頓・クリーンアップ ✅
+
+**完了タスク**
+- ルート・テンポラリ6ディレクトリ削除（`_pg7/` `_vidtmp/` `_vidtmp_v4/` `_vt4〜6/`、約1.7GB：レンダリング中間物）
+- 動画中間物削除（`_bg_images/` `_r2/` `_r3/` `_render/` `_render_v2/` `_v7/` 約435MB＋`prologue_tts.wav`・TTSログ）
+- 旧レンダラ `render_prologue.py` v1〜v7 削除。最終方式は `render_page_mode.py` のみ残存（旧版はgit履歴で復元可）
+- 制作共通フォルダ再編（2026-07-11実施分）の未コミット削除を確定。docs 9冊・scripts・tts_reference 等の二重管理を解消
+- 主題歌「金の十字架」を完全廃棄（ユーザー判断）：楽曲md・歌詞・オリジナルテスト曲4曲（golden_cross_theme/bgm_prologue/bgm_loud/hitohiki）。`bgm_catalog.md` に「ライブラリ曲のみ使用」を明記
+- `assets/` 重複mp3 23曲・`archive/本分OLD/第1章_v3.wav` 削除
+- `.gitignore` を再構築（文字化けで破損していた）：大容量メディア(`*.wav/*.mp4/*.mp3`)・`pdf/`・動画中間物(`動画/_*/`)・`**/ボツ/`・`.opencode/plans/` を除外
+- `動画/images/` 未追跡の挿絵9枚を追跡対象に追加
+
+**保持したもの（ローカル限定・git管理外）**:
+- `pdf/`（PDF3冊＋オーディオブックWAV 約1.3GB）
+- `動画/release/`（完成mp4 10本 約1.1GB）
+- `制作共通/bgm/`（DOVA・魔王魂ライブラリ曲 25曲）
+
+**ナレッジグラフ**: `.memory/memory.json` 新規作成（DayTrade/動画パイプライン/BGM方針/リポジトリ運用/執筆ワークフローの5エンティティ）
+
+**次回タスク（候補）**
+1. ナレーター声の決定（候補22テストWAV、推奨筆頭: 阿井田茂）
+2. 暫定動画10本のv2レンダラ再生成・release差し替え
+3. GoldenCross 第2章執筆再開（Phase 4 パイプライン）
