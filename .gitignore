@@ -39,3 +39,6 @@ novels/制作共通/font/
 /_pg7/
 /_vidtmp*/
 /_vt[0-9]*/
+
+# opencode session artifacts
+.opencode/plans/
